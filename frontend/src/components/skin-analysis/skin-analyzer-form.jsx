@@ -1,10 +1,23 @@
+
 "use client"
+
 import { useState } from "react"
-import { AlertCircle } from "lucide-react"
+import {
+  AlertCircle,
+  Check,
+  Droplets,
+  Sparkles,
+  ShieldCheck,
+  Sun,
+  Moon,
+  Leaf,
+  ArrowRight,
+} from "lucide-react"
 import Stepper, { Step } from "@/components/ui/Stepper"
 
 export default function SkinAnalyzerForm({ onAnalysisComplete }) {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(1)
+
   const [answers, setAnswers] = useState({
     skinType: "",
     concerns: [],
@@ -19,53 +32,61 @@ export default function SkinAnalyzerForm({ onAnalysisComplete }) {
   })
 
   const updateAnswer = (field, value) => {
-    setAnswers(prev => ({ ...prev, [field]: value }))
+    setAnswers((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
   }
 
   const toggleArrayAnswer = (field, value) => {
-    setAnswers(prev => {
+    setAnswers((prev) => {
       const current = prev[field]
       const updated = current.includes(value)
-        ? current.filter(item => item !== value)
+        ? current.filter((item) => item !== value)
         : [...current, value]
-      return { ...prev, [field]: updated }
+
+      return {
+        ...prev,
+        [field]: updated,
+      }
     })
   }
 
-  // Options with Local Images
+  // Skin type options
   const skinTypes = [
-    { 
-      id: "Oily", 
-      label: "Oily", 
+    {
+      id: "Oily",
+      label: "Oily",
       desc: "Shiny T-zone, enlarged pores",
-      image: "/OilySkin.jpg"
+      image: "/OilySkin.jpg",
     },
-    { 
-      id: "Dry", 
-      label: "Dry", 
+    {
+      id: "Dry",
+      label: "Dry",
       desc: "Tight, flaky, rough texture",
-      image: "/DrySkin.jpg"
+      image: "/DrySkin.jpg",
     },
-    { 
-      id: "Combination", 
-      label: "Combination", 
+    {
+      id: "Combination",
+      label: "Combination",
       desc: "Oily T-zone, dry cheeks",
-      image: "/combinationskin.jpg"
+      image: "/combinationskin.jpg",
     },
-    { 
-      id: "Normal", 
-      label: "Normal", 
+    {
+      id: "Normal",
+      label: "Normal",
       desc: "Balanced, few imperfections",
-      image: "/normalSkin.jpg"
+      image: "/normalSkin.jpg",
     },
-    { 
-      id: "Sensitive", 
-      label: "Sensitive", 
+    {
+      id: "Sensitive",
+      label: "Sensitive",
       desc: "Redness, irritation prone",
-      image: "/sensitveSkin.jpg"
+      image: "/sensitveSkin.jpg",
     },
   ]
 
+  // Skin concerns
   const concerns = [
     { id: "Acne", label: "Acne", image: "/Acne.jpg", desc: "Inflamed spots and pimples" },
     { id: "Breakouts", label: "Breakouts", image: "/Breakout.jpg", desc: "Sudden appearance of pimples" },
@@ -85,271 +106,545 @@ export default function SkinAnalyzerForm({ onAnalysisComplete }) {
     { id: "Rosacea", label: "Rosacea", image: "/Rosacea.jpg", desc: "Chronic redness and bumps" },
     { id: "Sensitivity", label: "Sensitivity", image: "/sensitveSkin.jpg", desc: "Easily irritated skin" },
     { id: "Dark circles", label: "Dark circles", image: "/Darkcircles.jpg", desc: "Darkness under eyes" },
-    { id: "Puffiness", label: "Puffiness", image: "/puffiness.jpg", desc: "Swelling around eyes" }
+    { id: "Puffiness", label: "Puffiness", image: "/puffiness.jpg", desc: "Swelling around eyes" },
   ]
 
   const allergies = [
-    "Parabens", "Sulfates", "Fragrance", "Alcohol", "Silicones", "Essential-oils"
+    "Parabens",
+    "Sulfates",
+    "Fragrance",
+    "Alcohol",
+    "Silicones",
+    "Essential-oils",
   ]
 
   const routineItems = [
-    "Vitamin C", "Retinol", "AHAs/BHAs", "Niacinamide", "Hyaluronic Acid", "None"
+    "Vitamin C",
+    "Retinol",
+    "AHAs/BHAs",
+    "Niacinamide",
+    "Hyaluronic Acid",
+    "None",
   ]
 
   const goals = [
-    "Hydration", "Glow & Brightening", "Anti-ageing", "Reduce Breakouts", "Even Tone"
+    "Hydration",
+    "Glow & Brightening",
+    "Anti-ageing",
+    "Reduce Breakouts",
+    "Even Tone",
   ]
 
-  const isNextDisabled = currentStep === 1 && !answers.skinType;
+  const isNextDisabled = currentStep === 1 && !answers.skinType
+
+  // Reusable selection button
+  const SelectionButton = ({ selected, children, onClick, className = "" }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`relative flex items-center justify-between gap-3 border px-4 py-3.5 text-left font-sans text-xs transition-all duration-300 ${selected
+          ? "border-[#294b40] bg-[#e9eee8] text-[#172b27] ring-1 ring-[#294b40]/20"
+          : "border-[#e7eae3] bg-white text-[#718078] hover:border-[#718477] hover:bg-[#f5f6f1]"
+        } ${className}`}
+    >
+      <span>{children}</span>
+
+      {selected && (
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#294b40] text-white">
+          <Check size={12} strokeWidth={2.5} />
+        </span>
+      )}
+    </button>
+  )
+
+  // Reusable section heading
+  const StepHeading = ({ eyebrow, title, description }) => (
+    <div className="mb-8">
+      <span className="font-sans text-[9px] font-semibold uppercase tracking-[0.3em] text-[#718477]">
+        {eyebrow}
+      </span>
+
+      <h2 className="mt-3 font-editorial text-3xl leading-tight text-[#172b27] sm:text-4xl">
+        {title}
+      </h2>
+
+      {description && (
+        <p className="mt-3 max-w-xl font-sans text-xs leading-6 text-[#879188] sm:text-sm">
+          {description}
+        </p>
+      )}
+    </div>
+  )
 
   return (
-    <section className="w-full py-4 max-w-4xl mx-auto ">
-      <Stepper
-        initialStep={1}
-        onStepChange={(step) => setCurrentStep(step)}
-        onFinalStepCompleted={() => onAnalysisComplete(answers)}
-        backButtonText="Back"
-        nextButtonText="Next"
-        stepCircleContainerClassName="bg-white"
-        isNextDisabled={isNextDisabled}
-      >
-        <Step>
-          <div className="space-y-6 px-[10px]">
-            <h2 className="text-2xl font-bold text-foreground">How would you describe your skin type?</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 ">
-              {skinTypes.map((type) => {
-                const isSelected = answers.skinType === type.id;
-                return (
-                  <button
-                    key={type.id}
-                    onClick={() => updateAnswer("skinType", type.id)}
-                    className={`group relative rounded-xl border-2 text-left transition-all overflow-hidden min-h-[120px] flex flex-col justify-end ${
-                      isSelected
-                        ? "border-primary ring-2 ring-primary/20"
-                        : "border-transparent hover:border-primary/50"
-                    }`}
-                  >
-                    {/* Background Image - Always Visible */}
-                    <img 
-                      src={type.image}
-                      alt={type.label}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    
-                    {/* Dark Gradient Overlay */}
-                    <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-opacity duration-300 ${
-                       isSelected ? "opacity-90" : "opacity-60 group-hover:opacity-80"
-                    }`} />
+    <section className="mx-auto w-full max-w-4xl py-6 sm:py-10">
 
-                    {/* Content - Slide up on hover/select */}
-                    <div className={`relative z-10 p-6 transform transition-all duration-300 ${
-                      isSelected 
-                        ? "translate-y-0 opacity-100" 
-                        : "translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100"
-                    }`}>
-                      <div className="font-semibold text-lg mb-1 text-white">{type.label}</div>
-                      <div className="text-sm text-gray-200">{type.desc}</div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </Step>
+      {/* Intro */}
+      <div className="mb-8 px-4 text-center">
+        <span className="font-sans text-[9px] font-semibold uppercase tracking-[0.35em] text-[#718477]">
+          Belief Cosmetics
+        </span>
 
-        <Step>
-          <div className="space-y-6 px-[10px]">
-            <h2 className="text-2xl font-bold text-foreground">What are your main skin concerns?</h2>
-            <p className="text-muted-foreground">Select all that apply</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {concerns.map((concern) => (
-                <div key={concern.id} className="relative group">
+        <h1 className="mt-3 font-editorial text-4xl text-[#172b27] sm:text-5xl">
+          Your Skin, <span className="italic text-[#718477]">Understood.</span>
+        </h1>
+
+        <p className="mx-auto mt-3 max-w-md font-sans text-xs leading-6 text-[#879188]">
+          A thoughtful assessment to help discover skincare recommendations
+          that align with your skin and lifestyle.
+        </p>
+      </div>
+
+      <div className="overflow-hidden border border-[#e7eae3] bg-[#fdfcf9] p-3 shadow-[0_12px_45px_rgba(23,43,39,0.04)] sm:p-6 md:p-8">
+
+        <Stepper
+          initialStep={1}
+          onStepChange={(step) => setCurrentStep(step)}
+          onFinalStepCompleted={() => onAnalysisComplete(answers)}
+          backButtonText="Back"
+          nextButtonText="Continue"
+          stepCircleContainerClassName="bg-[#f8f6f0]"
+          isNextDisabled={isNextDisabled}
+        >
+
+          {/* STEP 1: SKIN TYPE */}
+          <Step>
+            <div className="space-y-6 px-1 sm:px-2">
+
+              <StepHeading
+                eyebrow="Step 01 · Know Your Skin"
+                title={<>How would you describe your <span className="italic text-[#718477]">skin type?</span></>}
+                description="Choose the option that best describes how your skin naturally feels and behaves."
+              />
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {skinTypes.map((type) => {
+                  const isSelected = answers.skinType === type.id
+
+                  return (
                     <button
-                      onClick={() => toggleArrayAnswer("concerns", concern.id)}
-                      className={`w-full p-3 rounded-lg border text-sm font-medium transition-all ${
-                        answers.concerns.includes(concern.id)
-                          ? "border-primary text-primary bg-primary/5 ring-1 ring-primary"
-                          : "bg-background text-foreground border-border hover:border-primary"
-                      }`}
+                      key={type.id}
+                      type="button"
+                      onClick={() => updateAnswer("skinType", type.id)}
+                      aria-pressed={isSelected}
+                      className={`group relative flex min-h-[175px] overflow-hidden border text-left transition-all duration-500 sm:min-h-[190px] ${isSelected
+                          ? "border-[#294b40] ring-2 ring-[#294b40]/20"
+                          : "border-[#e7eae3] hover:border-[#718477]"
+                        }`}
                     >
-                      {concern.label}
+                      <img
+                        src={type.image}
+                        alt={type.label}
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+
+                      <div className={`absolute inset-0 bg-gradient-to-t from-[#101b17]/95 via-[#101b17]/35 to-transparent transition-opacity duration-300 ${isSelected ? "opacity-100" : "opacity-85 group-hover:opacity-95"
+                        }`} />
+
+                      {isSelected && (
+                        <span className="absolute right-4 top-4 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-[#f8f6f0] text-[#294b40]">
+                          <Check size={15} />
+                        </span>
+                      )}
+
+                      <div className="relative z-10 mt-auto w-full p-5">
+                        <span className="font-sans text-[9px] uppercase tracking-[0.2em] text-[#d2dfd0]">
+                          Skin Profile
+                        </span>
+
+                        <h3 className="mt-1 font-editorial text-2xl text-white">
+                          {type.label}
+                        </h3>
+
+                        <p className="mt-1 font-sans text-[11px] text-white/75">
+                          {type.desc}
+                        </p>
+
+                        <div className={`mt-3 h-px bg-white/60 transition-all duration-500 ${isSelected ? "w-12" : "w-0 group-hover:w-12"
+                          }`} />
+                      </div>
                     </button>
-                    {/* Hover Card */}
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-white rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none z-50 overflow-hidden border border-border translate-y-2 group-hover:translate-y-0">
-                        <div className="h-32 w-full">
-                            <img src={concern.image} alt={concern.label} className="w-full h-full object-cover" />
+                  )
+                })}
+              </div>
+
+              {!answers.skinType && (
+                <p className="font-sans text-[10px] text-[#879188]">
+                  Select a skin type to continue.
+                </p>
+              )}
+            </div>
+          </Step>
+
+          {/* STEP 2: SKIN CONCERNS */}
+          <Step>
+            <div className="space-y-6 px-1 sm:px-2">
+
+              <StepHeading
+                eyebrow="Step 02 · Understand Your Concerns"
+                title={<>What are your main <span className="italic text-[#718477]">skin concerns?</span></>}
+                description="Select all that apply. You can choose multiple concerns."
+              />
+
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
+                {concerns.map((concern) => {
+                  const isSelected = answers.concerns.includes(concern.id)
+
+                  return (
+                    <div key={concern.id} className="group relative">
+
+                      <button
+                        type="button"
+                        onClick={() => toggleArrayAnswer("concerns", concern.id)}
+                        aria-pressed={isSelected}
+                        className={`flex min-h-[54px] w-full items-center justify-between gap-2 border px-3 py-3 text-left font-sans text-[10px] transition-all duration-300 sm:text-xs ${isSelected
+                            ? "border-[#294b40] bg-[#e9eee8] text-[#172b27]"
+                            : "border-[#e7eae3] bg-white text-[#718078] hover:border-[#718477]"
+                          }`}
+                      >
+                        <span>{concern.label}</span>
+
+                        {isSelected && (
+                          <Check size={13} className="shrink-0 text-[#294b40]" />
+                        )}
+                      </button>
+
+                      {/* Hover Information */}
+                      <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-3 w-48 -translate-x-1/2 translate-y-2 overflow-hidden border border-[#e7eae3] bg-white opacity-0 shadow-xl transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                        <div className="h-28 overflow-hidden">
+                          <img
+                            src={concern.image}
+                            alt={concern.label}
+                            className="h-full w-full object-cover"
+                          />
                         </div>
-                        <div className="p-2 text-center bg-muted/50">
-                            <span className="text-xs font-medium text-muted-foreground">{concern.desc}</span>
+
+                        <div className="p-3 text-center">
+                          <p className="font-editorial text-lg text-[#172b27]">
+                            {concern.label}
+                          </p>
+
+                          <p className="mt-1 font-sans text-[10px] leading-4 text-[#879188]">
+                            {concern.desc}
+                          </p>
                         </div>
+                      </div>
                     </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Step>
+                  )
+                })}
+              </div>
 
-        <Step>
-          <div className="space-y-6 px-[10px]">
-            <h2 className="text-2xl font-bold text-foreground">Any allergies or sensitivities?</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {allergies.map((allergy) => (
-                <button
-                  key={allergy}
-                  onClick={() => toggleArrayAnswer("allergies", allergy)}
-                  className={`p-3 rounded-lg border text-sm font-medium transition-all ${
-                    answers.allergies.includes(allergy)
-                      ? "border-red-500 text-red-600 bg-red-50 ring-1 ring-red-500"
-                      : "bg-background text-foreground border-border hover:border-red-300"
-                  }`}
-                >
-                  {allergy}
-                </button>
-              ))}
-              <button
-                onClick={() => updateAnswer("allergies", [])}
-                className={`p-3 rounded-lg border text-sm font-medium transition-all ${
-                  answers.allergies.length === 0
-                    ? "border-green-500 text-green-600 bg-green-50 ring-1 ring-green-500"
-                    : "bg-background text-foreground border-border hover:border-green-300"
-                }`}
-              >
-                None
-              </button>
+              <p className="font-sans text-[10px] text-[#879188]">
+                {answers.concerns.length} concern(s) selected
+              </p>
             </div>
-          </div>
-        </Step>
+          </Step>
 
-        <Step>
-          <div className="space-y-8 px-[10px]">
-            <h2 className="text-2xl font-bold text-foreground">Lifestyle Check</h2>
-            
-            <div className="space-y-4">
-              <label className="block font-medium">How many hours of sleep do you get?</label>
-              <div className="flex gap-3">
-                {["< 6 hours", "6-8 hours", "> 8 hours"].map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => updateAnswer("sleep", opt)}
-                    className={`flex-1 p-3 rounded-lg border text-sm transition-all ${
-                      answers.sleep === opt ? "border-primary text-primary bg-primary/5 ring-1 ring-primary" : "bg-background border-border hover:border-primary/50"
-                    }`}
+          {/* STEP 3: ALLERGIES */}
+          <Step>
+            <div className="space-y-6 px-1 sm:px-2">
+
+              <StepHeading
+                eyebrow="Step 03 · Your Skin's Safety"
+                title={<>Any allergies or <span className="italic text-[#718477]">sensitivities?</span></>}
+                description="Select ingredients that you know your skin reacts to. Leave everything unselected if you have none."
+              />
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {allergies.map((allergy) => (
+                  <SelectionButton
+                    key={allergy}
+                    selected={answers.allergies.includes(allergy)}
+                    onClick={() => toggleArrayAnswer("allergies", allergy)}
                   >
-                    {opt}
-                  </button>
+                    {allergy}
+                  </SelectionButton>
                 ))}
               </div>
-            </div>
 
-            <div className="space-y-4">
-              <label className="block font-medium">Do you use sunscreen daily?</label>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => updateAnswer("sunscreen", true)}
-                  className={`flex-1 p-3 rounded-lg border transition-all ${answers.sunscreen === true ? "border-primary text-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:border-primary/50"}`}
-                >
-                  Yes, always
-                </button>
-                <button
-                  onClick={() => updateAnswer("sunscreen", false)}
-                  className={`flex-1 p-3 rounded-lg border transition-all ${answers.sunscreen === false ? "border-primary text-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:border-primary/50"}`}
-                >
-                  No / Sometimes
-                </button>
-              </div>
-            </div>
+              <div className="border border-[#dfe4dc] bg-[#f3f5ef] p-4 sm:p-5">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck
+                    size={19}
+                    strokeWidth={1.5}
+                    className="mt-0.5 shrink-0 text-[#294b40]"
+                  />
 
-             <div className="space-y-4">
-              <label className="block font-medium">Do you spend a lot of time outdoors?</label>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => updateAnswer("outdoors", true)}
-                  className={`flex-1 p-3 rounded-lg border transition-all ${answers.outdoors === true ? "border-primary text-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:border-primary/50"}`}
-                >
-                  Yes
-                </button>
-                <button
-                  onClick={() => updateAnswer("outdoors", false)}
-                  className={`flex-1 p-3 rounded-lg border transition-all ${answers.outdoors === false ? "border-primary text-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:border-primary/50"}`}
-                >
-                  No
-                </button>
-              </div>
-            </div>
-          </div>
-        </Step>
+                  <div className="flex-1">
+                    <h3 className="font-editorial text-xl text-[#172b27]">
+                      No known sensitivities?
+                    </h3>
 
-        <Step>
-          <div className="space-y-6 px-[10px]">
-            <h2 className="text-2xl font-bold text-foreground">Current Routine</h2>
-            <p className="text-muted-foreground">What active ingredients do you currently use?</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {routineItems.map((item) => (
-                <button
-                  key={item}
-                  onClick={() => toggleArrayAnswer("currentRoutine", item)}
-                  className={`p-3 rounded-lg border text-sm font-medium transition-all ${
-                    answers.currentRoutine.includes(item)
-                      ? "border-primary text-primary bg-primary/5 ring-1 ring-primary"
-                      : "bg-background text-foreground border-border hover:border-primary"
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-            
-            <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-yellow-800">
-                    <p className="font-semibold mb-1">Safety Check</p>
-                    <p>Have you ever had a severe reaction to skincare products?</p>
-                    <div className="flex gap-4 mt-2">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input 
-                                type="radio" 
-                                checked={answers.reactions === true} 
-                                onChange={() => updateAnswer("reactions", true)}
-                                className="accent-yellow-600"
-                            />
-                            Yes
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input 
-                                type="radio" 
-                                checked={answers.reactions === false} 
-                                onChange={() => updateAnswer("reactions", false)}
-                                className="accent-yellow-600"
-                            />
-                            No
-                        </label>
-                    </div>
+                    <p className="mt-1 font-sans text-[11px] leading-5 text-[#879188]">
+                      Select none if you don't have any known ingredient allergies.
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() => updateAnswer("allergies", [])}
+                      className={`mt-3 inline-flex items-center gap-2 border px-4 py-2 font-sans text-[10px] font-semibold uppercase tracking-wider transition-all ${answers.allergies.length === 0
+                          ? "border-[#294b40] bg-[#294b40] text-white"
+                          : "border-[#dfe4dc] bg-white text-[#294b40] hover:border-[#294b40]"
+                        }`}
+                    >
+                      {answers.allergies.length === 0 && <Check size={13} />}
+                      None
+                    </button>
+                  </div>
                 </div>
+              </div>
             </div>
-          </div>
-        </Step>
+          </Step>
 
-        <Step>
-          <div className="space-y-6 px-[10px]">
-            <h2 className="text-2xl font-bold text-foreground">What is your primary goal?</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {goals.map((goal) => (
-                <button
-                  key={goal}
-                  onClick={() => updateAnswer("goal", goal)}
-                  className={`p-4 rounded-xl border-2 text-left transition-all ${
-                    answers.goal === goal
-                      ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                      : "border-border hover:border-primary/50"
-                  }`}
-                >
-                  <div className="font-semibold text-lg">{goal}</div>
-                </button>
-              ))}
+          {/* STEP 4: LIFESTYLE */}
+          <Step>
+            <div className="space-y-8 px-1 sm:px-2">
+
+              <StepHeading
+                eyebrow="Step 04 · Everyday Habits"
+                title={<>A little about your <span className="italic text-[#718477]">lifestyle.</span></>}
+                description="Your daily habits can help us better understand your skincare needs."
+              />
+
+              {/* Sleep */}
+              <div className="border-b border-[#e7eae3] pb-7">
+                <div className="mb-4 flex items-center gap-3">
+                  <Moon size={18} className="text-[#718477]" strokeWidth={1.5} />
+
+                  <label className="font-editorial text-xl text-[#172b27]">
+                    How many hours of sleep do you get?
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                  {["< 6 hours", "6-8 hours", "> 8 hours"].map((opt) => (
+                    <SelectionButton
+                      key={opt}
+                      selected={answers.sleep === opt}
+                      onClick={() => updateAnswer("sleep", opt)}
+                      className="justify-center text-center"
+                    >
+                      {opt}
+                    </SelectionButton>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sunscreen */}
+              <div className="border-b border-[#e7eae3] pb-7">
+                <div className="mb-4 flex items-center gap-3">
+                  <Sun size={18} className="text-[#718477]" strokeWidth={1.5} />
+
+                  <label className="font-editorial text-xl text-[#172b27]">
+                    Do you use sunscreen daily?
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <SelectionButton
+                    selected={answers.sunscreen === true}
+                    onClick={() => updateAnswer("sunscreen", true)}
+                    className="justify-center"
+                  >
+                    Yes, always
+                  </SelectionButton>
+
+                  <SelectionButton
+                    selected={answers.sunscreen === false}
+                    onClick={() => updateAnswer("sunscreen", false)}
+                    className="justify-center"
+                  >
+                    No / Sometimes
+                  </SelectionButton>
+                </div>
+              </div>
+
+              {/* Outdoors */}
+              <div>
+                <div className="mb-4 flex items-center gap-3">
+                  <Sparkles size={18} className="text-[#718477]" strokeWidth={1.5} />
+
+                  <label className="font-editorial text-xl text-[#172b27]">
+                    Do you spend a lot of time outdoors?
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <SelectionButton
+                    selected={answers.outdoors === true}
+                    onClick={() => updateAnswer("outdoors", true)}
+                    className="justify-center"
+                  >
+                    Yes
+                  </SelectionButton>
+
+                  <SelectionButton
+                    selected={answers.outdoors === false}
+                    onClick={() => updateAnswer("outdoors", false)}
+                    className="justify-center"
+                  >
+                    No
+                  </SelectionButton>
+                </div>
+              </div>
             </div>
-          </div>
-        </Step>
-      </Stepper>
+          </Step>
+
+          {/* STEP 5: CURRENT ROUTINE */}
+          <Step>
+            <div className="space-y-7 px-1 sm:px-2">
+
+              <StepHeading
+                eyebrow="Step 05 · Existing Skincare"
+                title={<>What's in your current <span className="italic text-[#718477]">routine?</span></>}
+                description="Tell us which active ingredients you currently use in your skincare routine."
+              />
+
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {routineItems.map((item) => (
+                  <SelectionButton
+                    key={item}
+                    selected={answers.currentRoutine.includes(item)}
+                    onClick={() => toggleArrayAnswer("currentRoutine", item)}
+                    className="min-h-[58px]"
+                  >
+                    {item}
+                  </SelectionButton>
+                ))}
+              </div>
+
+              {/* Safety Check */}
+              <div className="border border-[#e8d9bf] bg-[#faf5eb] p-5 sm:p-6">
+                <div className="flex items-start gap-3">
+                  <AlertCircle
+                    size={21}
+                    strokeWidth={1.6}
+                    className="mt-0.5 shrink-0 text-[#a17b42]"
+                  />
+
+                  <div className="min-w-0 flex-1">
+                    <span className="font-sans text-[9px] font-semibold uppercase tracking-[0.2em] text-[#a17b42]">
+                      Important Safety Check
+                    </span>
+
+                    <h3 className="mt-2 font-editorial text-xl text-[#172b27]">
+                      Have you ever had a severe reaction to skincare products?
+                    </h3>
+
+                    <p className="mt-2 font-sans text-[11px] leading-5 text-[#8b806d]">
+                      This helps us take your previous skincare experiences into account.
+                    </p>
+
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={() => updateAnswer("reactions", true)}
+                        className={`flex min-w-[100px] items-center justify-center gap-2 border px-5 py-2.5 font-sans text-xs transition-all ${answers.reactions === true
+                            ? "border-[#a17b42] bg-[#a17b42] text-white"
+                            : "border-[#e8d9bf] bg-white text-[#806d4f] hover:border-[#a17b42]"
+                          }`}
+                      >
+                        {answers.reactions === true && <Check size={13} />}
+                        Yes
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => updateAnswer("reactions", false)}
+                        className={`flex min-w-[100px] items-center justify-center gap-2 border px-5 py-2.5 font-sans text-xs transition-all ${answers.reactions === false
+                            ? "border-[#294b40] bg-[#294b40] text-white"
+                            : "border-[#e8d9bf] bg-white text-[#806d4f] hover:border-[#294b40]"
+                          }`}
+                      >
+                        {answers.reactions === false && <Check size={13} />}
+                        No
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Step>
+
+          {/* STEP 6: PRIMARY GOAL */}
+          <Step>
+            <div className="space-y-6 px-1 sm:px-2">
+
+              <StepHeading
+                eyebrow="Step 06 · Your Skincare Goals"
+                title={<>What would you love your skin to <span className="italic text-[#718477]">achieve?</span></>}
+                description="Choose your primary skincare goal so we can tailor your recommendations."
+              />
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {goals.map((goal, index) => {
+                  const isSelected = answers.goal === goal
+
+                  return (
+                    <button
+                      key={goal}
+                      type="button"
+                      onClick={() => updateAnswer("goal", goal)}
+                      aria-pressed={isSelected}
+                      className={`group flex min-h-[76px] items-center justify-between gap-3 border px-5 py-4 text-left transition-all duration-300 ${isSelected
+                          ? "border-[#294b40] bg-[#e9eee8] ring-1 ring-[#294b40]/20"
+                          : "border-[#e7eae3] bg-white hover:border-[#718477] hover:bg-[#f5f6f1]"
+                        }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <span className="font-sans text-[9px] tracking-widest text-[#a4afa3]">
+                          0{index + 1}
+                        </span>
+
+                        <span className={`font-editorial text-xl ${isSelected ? "text-[#172b27]" : "text-[#52645a]"
+                          }`}>
+                          {goal}
+                        </span>
+                      </div>
+
+                      <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-all ${isSelected
+                          ? "border-[#294b40] bg-[#294b40] text-white"
+                          : "border-[#dfe4dc] text-transparent group-hover:border-[#718477]"
+                        }`}>
+                        <Check size={13} />
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {answers.goal && (
+                <div className="flex items-center gap-3 border border-[#dfe4dc] bg-[#f3f5ef] p-4">
+                  <Leaf size={17} className="shrink-0 text-[#718477]" />
+
+                  <p className="font-sans text-[11px] text-[#52645a]">
+                    Your primary goal: <span className="font-semibold text-[#172b27]">{answers.goal}</span>
+                  </p>
+                </div>
+              )}
+
+              <div className="border-t border-[#e7eae3] pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#e9eee8]">
+                    <Droplets size={18} className="text-[#294b40]" strokeWidth={1.5} />
+                  </div>
+
+                  <div>
+                    <p className="font-editorial text-lg text-[#172b27]">
+                      Your skin journey starts here.
+                    </p>
+
+                    <p className="font-sans text-[10px] text-[#879188]">
+                      Complete the assessment to explore your recommendations.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Step>
+
+        </Stepper>
+      </div>
     </section>
   )
 }
