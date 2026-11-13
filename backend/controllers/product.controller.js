@@ -24,7 +24,14 @@ const ALLOWED_SKIN_CONCERNS = [
 ];
 
 const ALLOWED_SKIN_TYPES = ["Oily", "Dry", "Combination", "Sensitive", "Normal", "All"];
-const ALLOWED_CATEGORIES = ["Cleanser", "Moisturizer", "Serum", "Sunscreen", "Mask", "Toner", "Treatment"];
+const ALLOWED_CATEGORIES = [
+  "Face Wash",
+  "Bath Salt",
+  "Ubtan",
+  "Soap",
+  "Gel",
+  "Fragrance Balm",
+];
 
 const NORMALIZATION_MAP = {
   "OilControl": "Large pores",

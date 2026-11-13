@@ -20,7 +20,14 @@ export default function ProductFilters({ filters, setFilters }) {
   }
 
   const skinTypes = ['Oily', 'Dry', 'Combination', 'Sensitive', 'Normal']
-  const categories = ["Cleanser", "Moisturizer", "Serum", "Sunscreen", "Mask", "Toner", "Treatment"]
+  const categories = [
+    "Face Wash",
+    "Bath Salt",
+    "Ubtan",
+    "Soap",
+    "Gel",
+    "Fragrance Balm",
+  ]
   const concerns = [
     "Acne", "Breakouts", "Blackheads", "Large pores", "Uneven texture", 
     "Pigmentation", "Dark spots", "Uneven tone", "Dullness", "Fine lines", 

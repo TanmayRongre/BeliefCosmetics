@@ -4,11 +4,11 @@ import { Link } from "react-router-dom";
 // Helper to ensure paths are somewhat standard if passed correctly
 // Accepting title, price, image, bgImage as props to make it reusable
 const ThreeDProductCard = ({ 
-  title = "Sun Screen", 
+  title = "Soap", 
   price = "899.00", 
-  image = "/sunscreen.png", 
-  bgImage = "/sunscreen.jpg",
-  category = "All",
+  image = "/Soap.png", 
+  bgImage = "/Soap.jpg",
+  category = "Soap",
   className = ""
 }) => {
   return (

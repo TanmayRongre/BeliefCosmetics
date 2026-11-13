@@ -23,10 +23,12 @@ export default function SearchBar({
   };
 
   const suggestions = [
-    "Sunscreen",
-    "Serum",
-    "Moisturiser",
-    "Toner",
+    "Face Wash",
+    "Bath Salt",
+    "Ubtan",
+    "Soap",
+    "Gel",
+    "Fragrance Balm",
   ];
 
   return (

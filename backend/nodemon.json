@@ -2,3 +2,4 @@
   "watch": [".", ".env"],
   "ext": "js,json,env"
 }
+

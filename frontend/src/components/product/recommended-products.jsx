@@ -207,7 +207,7 @@ export default function RecommendedProducts({ analysis, onReset, isEmbedded = fa
                 <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
                     {(() => {
                          // Logic to get categories for tabs
-                         const cats = ["Cleanser", "Toner", "Serum", "Moisturizer", "Sunscreen", "Mask"];
+                         const cats = ["Face Wash", "Bath Salt", "Ubtan", "Soap", "Gel", "Fragrance Balm"];
                          const availableCats = new Set();
                          recommendations.forEach(p => {
                              const pCat = (p.category || "").toLowerCase();
@@ -248,7 +248,7 @@ export default function RecommendedProducts({ analysis, onReset, isEmbedded = fa
             {(() => {
                 // Determine groups
                 const groups = {};
-                const cats = ["Cleanser", "Toner", "Serum", "Moisturizer", "Sunscreen", "Mask"];
+                const cats = ["Face Wash", "Bath Salt", "Ubtan", "Soap", "Gel", "Fragrance Balm"];
                 
                 recommendations.forEach(product => {
                     const pCat = (product.category || "").toLowerCase();

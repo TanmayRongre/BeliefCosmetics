@@ -57,77 +57,59 @@ const getSkinTypeInfo = (skinType) => {
 const generateRoutine = (profile, recommendations) => {
   const steps = [];
 
-  // 1. Cleanser (ALWAYS)
+  // 1. Face Wash (Daily Cleanse)
   steps.push({ 
-    name: "Cleanser", 
-    category: "Cleanser", 
-    description: "Gentle removal of impurities", 
+    name: "Face Wash", 
+    category: "Face Wash", 
+    description: "Gentle daily facial cleanse", 
     icon: "Droplets",
     frequency: "Daily"
   });
 
-  // 2. Toner (OPTIONAL)
-  if (profile.skinType === "Dry" || profile.skinType === "Sensitive") {
-    steps.push({ 
-      name: "Toner", 
-      category: "Toner", 
-      description: "Prep and balance pH", 
-      icon: "Spray",
-      frequency: "Optional"
-    });
-  }
-
-  // 3. Serum / Treatment (CONDITIONAL)
-  const activeConcerns = ["Acne", "Pigmentation", "Dark spots", "Uneven tone", "Dullness", "Fine lines", "Wrinkles", "Uneven texture"];
-  const hasActiveConcern = profile.concerns.some(c => activeConcerns.includes(c));
-  const skipSerum = profile.skinType === "Sensitive" && !hasActiveConcern;
-
-  if (hasActiveConcern && !skipSerum) {
-    steps.push({ 
-      name: "Treatment", 
-      category: "Serum", 
-      description: "Target specific concerns", 
-      icon: "Sparkles",
-      frequency: "Daily"
-    });
-  }
-
-  // 4. Moisturizer (ALWAYS)
+  // 2. Soap (Bath & Body Cleanse)
   steps.push({ 
-    name: "Moisturizer", 
-    category: "Moisturizer", 
-    description: "Lock in hydration", 
+    name: "Soap", 
+    category: "Soap", 
+    description: "Pure handcrafted botanical soap", 
+    icon: "Sparkles",
+    frequency: "Daily"
+  });
+
+  // 3. Gel (Hydration & Soothing)
+  steps.push({ 
+    name: "Gel", 
+    category: "Gel", 
+    description: "Lightweight soothing hydration", 
     icon: "Waves",
     frequency: "Daily"
   });
 
-  // 5. Sunscreen (ALWAYS)
+  // 4. Fragrance Balm (Moisture & Aroma)
   steps.push({ 
-    name: "Sunscreen", 
-    category: "Sunscreen", 
-    description: "Protect from UV damage", 
-    icon: "Sun",
+    name: "Fragrance Balm", 
+    category: "Fragrance Balm", 
+    description: "Rich nourishing aromatic balm", 
+    icon: "Spray",
     frequency: "Daily"
   });
 
-  // 6. Mask (CONDITIONAL / OCCASIONAL)
-  const maskConcerns = ["Dullness", "Uneven texture"];
-  const showMask = (
-    maskConcerns.some(c => profile.concerns.includes(c)) || 
-    profile.skinType === "Dry" || 
-    profile.skinType === "Oily"
-  );
-  const skipMask = profile.skinType === "Sensitive" || profile.concerns.includes("Rosacea");
+  // 5. Ubtan (Exfoliation & Glow)
+  steps.push({ 
+    name: "Ubtan", 
+    category: "Ubtan", 
+    description: "Natural herbal glow treatment", 
+    icon: "Smile", 
+    frequency: "2-3x / week"
+  });
 
-  if (showMask && !skipMask) {
-    steps.push({ 
-      name: "Mask", 
-      category: "Mask", 
-      description: "Weekly boost", 
-      icon: "Smile", 
-      frequency: "Occasional"
-    });
-  }
+  // 6. Bath Salt (Detox & Soak)
+  steps.push({ 
+    name: "Bath Salt", 
+    category: "Bath Salt", 
+    description: "Therapeutic mineral bath soak", 
+    icon: "Sun",
+    frequency: "Weekly"
+  });
 
   return steps.map(step => {
     // Find a product in recommendations that matches this category
@@ -358,7 +340,7 @@ export const evaluateProfile = async (req, res) => {
 
     // 3. Sort and Filter
     // 3. Sort and Filter (Categorized)
-    const categories = ["Cleanser", "Toner", "Serum", "Moisturizer", "Sunscreen", "Mask"];
+    const categories = ["Face Wash", "Bath Salt", "Ubtan", "Soap", "Gel", "Fragrance Balm"];
     let finalRecommendations = [];
     const seenIds = new Set();
     
@@ -454,7 +436,7 @@ export const getProfile = async (req, res) => {
         const scoredProducts = scoreProducts(profile, candidates);
         
         // Recalculate top recommendations categorized
-        const categories = ["Cleanser", "Toner", "Serum", "Moisturizer", "Sunscreen", "Mask"];
+        const categories = ["Face Wash", "Bath Salt", "Ubtan", "Soap", "Gel", "Fragrance Balm"];
         let finalRecommendations = [];
         const seenIds = new Set();
         

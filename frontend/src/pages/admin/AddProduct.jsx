@@ -20,12 +20,11 @@ import { useNavigate, useParams } from "react-router-dom";
 
 const categories = [
   "Face Wash",
-  "Moisturizer",
-  "Serum",
-  "Sunscreen",
-  "Mask",
-  "Toner",
-  "Treatment",
+  "Bath Salt",
+  "Ubtan",
+  "Soap",
+  "Gel",
+  "Fragrance Balm",
 ];
 
 const skinTypes = ["Oily", "Dry", "Combination", "Sensitive", "Normal"];

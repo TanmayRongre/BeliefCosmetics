@@ -3,13 +3,12 @@ import LogoLoop from "../ui/LogoLoop";
 
 export default function ProductCategoryCircles({ filters, setFilters }) {
   const categories = [
-    { name: "Serum", image: "/serum.jpg" },
-    { name: "Cleanser", image: "/Cleanser.jpg" },
-    { name: "Moisturizer", image: "/moisturiser.jpg" },
-    { name: "Mask", image: "/mask.jpg" },
-    { name: "Toner", image: "/toner.jpg" },
-    { name: "Treatment", image: "/treatment.jpg" },
-    { name: "Sunscreen", image: "/sunscreen.jpg" },
+    { name: "Face Wash", image: "/Facewash.jpg" },
+    { name: "Bath Salt", image: "/Bathsalt.jpg" },
+    { name: "Ubtan", image: "/Ubtan.jpg" },
+    { name: "Soap", image: "/Soap.jpg" },
+    { name: "Gel", image: "/Gel.jpg" },
+    { name: "Fragrance Balm", image: "/FragranceBalm.jpg" },
   ];
 
   const handleCategoryClick = (categoryName) => {

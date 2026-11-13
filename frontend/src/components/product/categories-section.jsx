@@ -1,9 +1,11 @@
 export default function CategoriesSection() {
   const categories = [
-    { id: 1, name: "Serums", productCount: 8, status: "Active" },
-    { id: 2, name: "Skincare", productCount: 15, status: "Active" },
-    { id: 3, name: "Creams", productCount: 12, status: "Active" },
-    { id: 4, name: "Masks", productCount: 6, status: "Active" },
+    { id: 1, name: "Face Wash", productCount: 8, status: "Active" },
+    { id: 2, name: "Bath Salt", productCount: 6, status: "Active" },
+    { id: 3, name: "Ubtan", productCount: 5, status: "Active" },
+    { id: 4, name: "Soap", productCount: 12, status: "Active" },
+    { id: 5, name: "Gel", productCount: 4, status: "Active" },
+    { id: 6, name: "Fragrance Balm", productCount: 3, status: "Active" },
   ]
 
   return (
