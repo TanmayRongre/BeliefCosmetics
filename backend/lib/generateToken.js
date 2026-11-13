@@ -9,11 +9,14 @@ export const generateTokenAndSetCookie = (userId, res, role = "customer") => {
 		expiresIn: expiresIn,
 	});
 
+	const isDev = process.env.NODE_ENV === "development";
+
 	res.cookie("jwt", token, {
 		maxAge: maxAge,
 		httpOnly: true, // prevent XSS attacks
-		sameSite: process.env.NODE_ENV === "development" ? "strict" : "none",
-		secure: process.env.NODE_ENV !== "development",
+		sameSite: isDev ? "lax" : "none",
+		secure: !isDev,
+		path: "/",
 	});
 
 	return token;
