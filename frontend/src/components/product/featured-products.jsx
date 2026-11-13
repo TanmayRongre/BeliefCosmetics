@@ -10,32 +10,32 @@ gsap.registerPlugin(ScrollTrigger);
 
 const products = [
   {
-    title: "Sun Screen",
+    title: "Soap",
     price: "899.00",
-    image: "/sunscreen.png",
-    bgImage: "/sunscreen.jpg",
-    category: "Sunscreen",
+    image: "/Soap.png",
+    bgImage: "/Soap.jpg",
+    category: "Soap",
   },
   {
-    title: "Toner",
+    title: "Face Wash",
     price: "699.00",
-    image: "/toner.png",
-    bgImage: "/toner.jpg",
-    category: "Toner",
+    image: "/Facewash.png",
+    bgImage: "/Facewash.jpg",
+    category: "Facewash",
   },
   {
-    title: "Serum",
+    title: "Ubtan",
     price: "999.00",
-    image: "/serum.png",
-    bgImage: "/serum.jpg",
-    category: "Serum",
+    image: "/Ubtan.png",
+    bgImage: "/Ubtan.jpg",
+    category: "Ubtan",
   },
   {
-    title: "Moisturiser",
+    title: "Bath Salt",
     price: "499.00",
-    image: "/moisturiser.png",
-    bgImage: "/moisturiser.jpg",
-    category: "Moisturizer",
+    image: "/Bathsalt.png",
+    bgImage: "/Bathsalt.jpg",
+    category: "Bathsalt",
   },
 ];
 
