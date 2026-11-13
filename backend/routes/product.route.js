@@ -20,7 +20,12 @@ router.get("/categories", getProductCategories);
 router.get("/:id", getProductById);
 router.put("/:id", protectRoute, adminRoute, updateProduct);
 
-router.post("/cleanup-duplicates", protectRoute, adminRoute, deleteDuplicateProducts);
+router.post(
+  "/cleanup-duplicates",
+  protectRoute,
+  adminRoute,
+  deleteDuplicateProducts,
+);
 router.delete("/:id", protectRoute, adminRoute, deleteProduct);
 
 export default router;

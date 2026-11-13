@@ -1,45 +1,78 @@
+
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { Link, useNavigate } from "react-router-dom"
-import { Heart } from "lucide-react"
+import { Heart, ShoppingBag, ArrowUpRight } from "lucide-react"
 import ProductQuickView from "@/components/product/product-quick-view"
 import { useWishlistStore } from "@/store/useWishlistStore"
 import { useAuthStore } from "@/store/useAuthStore"
 import { useCartStore } from "@/store/useCartStore"
-import toast from "react-hot-toast"
 
-export default function ProductGrid({ viewType, filters, products = [] }) {
+export default function ProductGrid({
+  viewType,
+  filters,
+  products = [],
+}) {
   const [selectedProduct, setSelectedProduct] = useState(null)
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore()
+
+  const {
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
+  } = useWishlistStore()
+
   const { authUser, openAuthModal } = useAuthStore()
   const { addToCart } = useCartStore()
   const navigate = useNavigate()
 
+  // Products are filtered on the server
+  const filteredProducts = products
+
+  const getProductId = (product) => product._id || product.id
+
+  const getProductImage = (product) =>
+    product.images?.[0] || product.image || "/placeholder.svg"
+
+  const getProductTags = (product) =>
+    (product.allergyLabels || product.tags || []).slice(0, 2)
+
+  const isOutOfStock = (product) =>
+    product.status === "Out of Stock" || product.stock === 0
+
   const handleBuyNow = async (e, product) => {
     e.preventDefault()
+    e.stopPropagation()
+
     if (!authUser) {
       openAuthModal({ type: "login" })
       return
     }
-    await addToCart(product._id || product.id, 1)
+
+    await addToCart(getProductId(product), 1)
     navigate("/cart")
   }
 
   const handleAddToCart = (e, product) => {
     e.preventDefault()
+    e.stopPropagation()
+
     if (!authUser) {
       openAuthModal({ type: "login" })
       return
     }
-    addToCart(product._id || product.id, 1)
+
+    addToCart(getProductId(product), 1)
   }
 
   const handleWishlistToggle = (e, productId) => {
-    e.preventDefault() // Prevent navigation
+    e.preventDefault()
+    e.stopPropagation()
+
     if (!authUser) {
       openAuthModal({ type: "wishlist" })
       return
     }
+
     if (isInWishlist(productId)) {
       removeFromWishlist(productId)
     } else {
@@ -47,141 +80,297 @@ export default function ProductGrid({ viewType, filters, products = [] }) {
     }
   }
 
-  // Products are now filtered on the server
-  const filteredProducts = products;
-
+  // Empty state
   if (filteredProducts.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="bg-gray-100 p-6 rounded-full mb-4">
-          <Heart className="w-10 h-10 text-gray-400" />
+      <div className="flex min-h-[420px] flex-col items-center justify-center px-6 py-20 text-center">
+        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-[#e7eae3] bg-[#f1f2ec]">
+          <Heart
+            className="h-8 w-8 text-[#718477]"
+            strokeWidth={1.2}
+          />
         </div>
-        <h3 className="text-xl font-semibold text-gray-800 mb-2">No Products Found</h3>
-        <p className="text-gray-500 max-w-sm">
-          We couldn't find any products matching your filters. Try adjusting your search or filter criteria.
+
+        <p className="mb-2 font-sans text-[10px] uppercase tracking-[0.25em] text-[#879188]">
+          Your search
+        </p>
+
+        <h3 className="mb-3 font-editorial text-3xl text-[#172b27]">
+          No Products Found
+        </h3>
+
+        <p className="max-w-sm font-sans text-sm leading-7 text-[#879188]">
+          We couldn't find any products matching your filters.
+          Try adjusting your search or filter criteria.
         </p>
       </div>
     )
   }
 
+  // GRID VIEW
   if (viewType === "grid") {
     return (
       <>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredProducts.map((product) => (
-            <Link key={product._id || product.id} to={`/products/${product._id || product.id}`}>
-              <motion.div 
-                layoutId={`product-card-${product._id || product.id}`}
-                className="relative bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer h-full flex flex-col"
+        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+          {filteredProducts.map((product, index) => {
+            const productId = getProductId(product)
+            const wishlisted = isInWishlist(productId)
+            const tags = getProductTags(product)
+
+            return (
+              <motion.div
+                key={productId}
+                layout
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.45,
+                  delay: Math.min(index * 0.05, 0.25),
+                }}
+                className="group flex h-[510px] min-w-0 flex-col overflow-hidden"
               >
-                {/* Image */}
-                <div className="relative h-48 bg-white overflow-hidden flex items-center justify-center p-4">
-                  <motion.img
-                    layoutId={`product-image-${product._id || product.id}`}
-                    src={product.images?.[0] || product.image || "/placeholder.svg"}
-                    alt={product.name}
-                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
-                  />
-                  <button 
-                    onClick={(e) => handleWishlistToggle(e, product._id || product.id)}
-                    className={`absolute top-3 right-3 rounded-full p-2 transition-colors shadow-sm ${isInWishlist(product._id || product.id) ? "bg-primary/10" : "bg-white hover:bg-muted"}`}
+                {/* Product image */}
+                <div className="relative h-[290px] shrink-0 overflow-hidden bg-[#f1f2ec]">
+                  <Link
+                    to={`/products/${productId}`}
+                    className="block h-full w-full"
                   >
-                    <Heart className={`w-5 h-5 ${isInWishlist(product._id || product.id) ? "fill-primary text-primary" : "text-primary"}`} />
+                    <motion.img
+                      layoutId={`product-image-${productId}`}
+                      src={getProductImage(product)}
+                      alt={product.name}
+                      className="h-full w-full object-contain p-7 transition-transform duration-700 ease-out group-hover:scale-105"
+                    />
+                  </Link>
+
+                  {/* Wishlist */}
+                  <button
+                    type="button"
+                    onClick={(e) =>
+                      handleWishlistToggle(e, productId)
+                    }
+                    aria-label={
+                      wishlisted
+                        ? "Remove from wishlist"
+                        : "Add to wishlist"
+                    }
+                    className={`absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border transition-all duration-300 ${wishlisted
+                        ? "border-[#172b27] bg-[#172b27] text-white"
+                        : "border-[#e7eae3] bg-[#f8f6f0] text-[#294b40] hover:border-[#172b27] hover:bg-[#172b27] hover:text-white"
+                      }`}
+                  >
+                    <Heart
+                      size={17}
+                      strokeWidth={1.5}
+                      className={wishlisted ? "fill-current" : ""}
+                    />
                   </button>
+
+                  {/* Category / Stock */}
+                  <div className="absolute bottom-4 left-4">
+                    {isOutOfStock(product) ? (
+                      <span className="bg-[#172b27] px-3 py-1.5 font-sans text-[9px] uppercase tracking-[0.16em] text-white">
+                        Sold Out
+                      </span>
+                    ) : (
+                      <span className="border border-[#dfe4dc] bg-[#f8f6f0]/95 px-3 py-1.5 font-sans text-[9px] uppercase tracking-[0.16em] text-[#294b40]">
+                        {product.category}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                {/* Content */}
-                <div className="p-4">
-                  <p className="text-xs text-primary font-medium mb-1">{product.category}</p>
-                  <h3 className="text-sm font-medium text-foreground mb-2 truncate">{product.name}</h3>
+                {/* Product details */}
+                <div className="flex min-h-0 flex-1 flex-col pt-5">
+                  {/* Name and price */}
+                  <div className="mb-2 flex items-start justify-between gap-3">
+                    <Link
+                      to={`/products/${productId}`}
+                      className="min-w-0 flex-1"
+                    >
+                      <h3 className="line-clamp-2 min-h-[52px] font-editorial text-[23px] leading-tight text-[#172b27] transition-colors duration-300 group-hover:text-[#718477]">
+                        {product.name}
+                      </h3>
+                    </Link>
 
-                  {/* Rating */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xs text-primary">★ {product.rating ? product.rating.toFixed(1) : "New"}</span>
-                    <span className="text-xs text-muted-foreground">({product.reviews || 0})</span>
+                    <span className="shrink-0 pt-1 font-sans text-sm font-medium text-[#172b27]">
+                      ₹{product.price}
+                    </span>
                   </div>
 
-                  {/* Tags */}
-                  <div className="flex gap-1 mb-3 flex-wrap">
-                    {(product.allergyLabels || product.tags || []).slice(0, 2).map((tag) => (
-                      <span key={tag} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                  {/* Rating */}
+                  <div className="mb-4 flex h-[18px] shrink-0 items-center gap-2">
+                    <span className="text-xs text-[#718477]">
+                      ★ {product.rating
+                        ? product.rating.toFixed(1)
+                        : "New"}
+                    </span>
+
+                    <span className="h-1 w-1 rounded-full bg-[#c5ccc2]" />
+
+                    <span className="font-sans text-[11px] text-[#879188]">
+                      {product.reviews || 0} Reviews
+                    </span>
+                  </div>
+
+                  {/* Fixed tag area */}
+                  <div className="mb-4 flex h-[26px] shrink-0 flex-wrap content-start gap-2 overflow-hidden">
+                    {tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="border border-[#dfe4dc] px-2.5 py-1 font-sans text-[9px] uppercase tracking-[0.1em] text-[#718477]"
+                      >
                         {tag}
                       </span>
                     ))}
                   </div>
 
-                  {/* Price and Button */}
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-foreground">₹{product.price}</span>
-                    <button 
-                      onClick={(e) => handleAddToCart(e, product)}
-                      className="bg-primary text-primary-foreground px-3 py-1 rounded-lg text-xs font-medium hover:opacity-90 transition-opacity"
-                    >
-                      Add
-                    </button>
-                  </div>
+                  {/* Fixed bottom button */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleAddToCart(e, product)}
+                    disabled={isOutOfStock(product)}
+                    className="mt-auto flex w-full shrink-0 items-center justify-between border border-[#172b27] bg-[#172b27] px-5 py-3.5 font-sans text-[10px] uppercase tracking-[0.18em] text-[#f8f6f0] transition-all duration-300 hover:bg-[#294b40] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <span>
+                      {isOutOfStock(product) ? "Sold Out" : "Add to Bag"}
+                    </span>
+
+                    <ShoppingBag size={15} strokeWidth={1.5} />
+                  </button>
                 </div>
               </motion.div>
-            </Link>
-          ))}
+            )
+          })}
         </div>
 
-        {selectedProduct && <ProductQuickView product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
+        {selectedProduct && (
+          <ProductQuickView
+            product={selectedProduct}
+            onClose={() => setSelectedProduct(null)}
+          />
+        )}
       </>
     )
   }
 
-  // List view
+  // LIST VIEW
   return (
     <>
-      <div className="space-y-4">
-        {filteredProducts.map((product) => (
-          <Link key={product._id || product.id} to={`/products/${product._id || product.id}`}>
-            <div className="bg-white rounded-2xl p-4 my-4 flex  gap-4 hover:shadow-lg transition-shadow cursor-pointer">
-              <div className="w-24 h-24 bg-white rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center border border-gray-100">
-                <img
-                  src={product.images?.[0] || product.image || "/placeholder.svg"}
-                  alt={product.name}
-                  className="w-full h-full object-contain"
-                />
-              </div>
+      <div className="space-y-0">
+        {filteredProducts.map((product, index) => {
+          const productId = getProductId(product)
+          const wishlisted = isInWishlist(productId)
 
-              <div className="flex-1 flex flex-col justify-between">
+          return (
+            <motion.div
+              key={productId}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.35,
+                delay: Math.min(index * 0.04, 0.2),
+              }}
+              className="group flex min-h-[176px] flex-col gap-5 border-b border-[#e7eae3] py-5 sm:flex-row sm:items-center"
+            >
+              {/* Image */}
+              <Link
+                to={`/products/${productId}`}
+                className="h-[136px] w-full shrink-0 overflow-hidden bg-[#f1f2ec] sm:w-[136px]"
+              >
+                <img
+                  src={getProductImage(product)}
+                  alt={product.name}
+                  className="h-full w-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+                />
+              </Link>
+
+              {/* Details */}
+              <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
                 <div>
-                  <p className="text-xs text-primary font-medium mb-1">{product.category}</p>
-                  <h3 className="font-medium text-foreground mb-2 truncate">{product.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-2">{(product.ingredients || []).join(", ")}</p>
+                  <p className="mb-2 font-sans text-[9px] uppercase tracking-[0.2em] text-[#718477]">
+                    {product.category}
+                  </p>
+
+                  <Link to={`/products/${productId}`}>
+                    <h3 className="line-clamp-2 min-h-[52px] font-editorial text-2xl leading-tight text-[#172b27] transition-colors group-hover:text-[#718477]">
+                      {product.name}
+                    </h3>
+                  </Link>
+
+                  <p className="mt-2 line-clamp-2 min-h-[40px] font-sans text-xs leading-5 text-[#879188]">
+                    {product.ingredients?.length
+                      ? product.ingredients.join(", ")
+                      : ""}
+                  </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-primary">
-                    ★ {product.rating ? product.rating.toFixed(1) : "New"} ({product.reviews || 0})
+
+                <div className="flex h-[18px] items-center gap-2">
+                  <span className="text-xs text-[#718477]">
+                    ★ {product.rating
+                      ? product.rating.toFixed(1)
+                      : "New"}
+                  </span>
+
+                  <span className="h-1 w-1 rounded-full bg-[#c5ccc2]" />
+
+                  <span className="font-sans text-[11px] text-[#879188]">
+                    {product.reviews || 0} Reviews
                   </span>
                 </div>
               </div>
 
-              <div className="flex flex-col items-end justify-between">
-                <button 
-                  onClick={(e) => handleWishlistToggle(e, product._id || product.id)}
-                  className={`p-2 rounded-lg ${isInWishlist(product._id || product.id) ? "bg-primary/10" : "hover:bg-muted"}`}
+              {/* Actions */}
+              <div className="flex shrink-0 items-center justify-between gap-4 sm:min-h-[136px] sm:flex-col sm:items-end">
+                <button
+                  type="button"
+                  onClick={(e) =>
+                    handleWishlistToggle(e, productId)
+                  }
+                  aria-label={
+                    wishlisted
+                      ? "Remove from wishlist"
+                      : "Add to wishlist"
+                  }
+                  className={`flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-300 ${wishlisted
+                      ? "border-[#172b27] bg-[#172b27] text-white"
+                      : "border-[#dfe4dc] text-[#294b40] hover:bg-[#172b27] hover:text-white"
+                    }`}
                 >
-                  <Heart className={`w-5 h-5 ${isInWishlist(product._id || product.id) ? "fill-primary text-primary" : "text-primary"}`} />
+                  <Heart
+                    size={16}
+                    strokeWidth={1.5}
+                    className={wishlisted ? "fill-current" : ""}
+                  />
                 </button>
-                <div className="text-right">
-                  <p className="font-semibold text-foreground mb-2">₹{product.price} </p>
-                  <button 
+
+                <div className="flex items-center gap-4 sm:flex-col sm:items-end">
+                  <p className="font-sans text-base font-medium text-[#172b27]">
+                    ₹{product.price}
+                  </p>
+
+                  <button
+                    type="button"
                     onClick={(e) => handleAddToCart(e, product)}
-                    className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90"
+                    disabled={isOutOfStock(product)}
+                    className="flex items-center gap-3 bg-[#172b27] px-5 py-3 font-sans text-[10px] uppercase tracking-[0.16em] text-[#f8f6f0] transition-colors hover:bg-[#294b40] disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    Add
+                    {isOutOfStock(product) ? "Sold Out" : "Add to Bag"}
+                    <ArrowUpRight size={14} />
                   </button>
                 </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            </motion.div>
+          )
+        })}
       </div>
 
-      {selectedProduct && <ProductQuickView product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
+      {selectedProduct && (
+        <ProductQuickView
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
     </>
   )
 }

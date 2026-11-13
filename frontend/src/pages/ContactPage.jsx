@@ -1,176 +1,267 @@
-import { useState, useRef, useEffect } from "react";
-import axiosInstance from "@/lib/axios";
-import toast from "react-hot-toast";
-import { Mail, Phone, MapPin, Send, MessageSquare, Clock, Instagram, Facebook, Twitter } from "lucide-react";
-import { useAuthStore } from "@/store/useAuthStore";
-import { motion } from "framer-motion";
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
 
-
+import { useState, useEffect } from "react"
+import axiosInstance from "@/lib/axios"
+import toast from "react-hot-toast"
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Send,
+  Instagram,
+  Facebook,
+  Twitter,
+  ArrowUpRight,
+} from "lucide-react"
+import { useAuthStore } from "@/store/useAuthStore"
+import Header from "@/components/layout/header"
+import Footer from "@/components/layout/footer"
 
 export default function ContactPage() {
-  const videoRef = useRef(null);
-  const { authUser } = useAuthStore();
-
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.playbackRate = 0.5;
-    }
-  }, []);
+  const { authUser } = useAuthStore()
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     subject: "",
     message: "",
-  });
+  })
+
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (authUser) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         name: authUser.name || "",
-        email: authUser.email || ""
-      }));
+        email: authUser.email || "",
+      }))
     }
-  }, [authUser]);
-
-  const [loading, setLoading] = useState(false);
+  }, [authUser])
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }))
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault()
+    setLoading(true)
 
     try {
-      await axiosInstance.post("/contact", formData);
-      toast.success("Message sent successfully!");
-      setFormData({ name: "", email: "", subject: "", message: "" });
+      await axiosInstance.post("/contact", formData)
+
+      toast.success("Message sent successfully!")
+
+      setFormData({
+        name: authUser?.name || "",
+        email: authUser?.email || "",
+        subject: "",
+        message: "",
+      })
     } catch (error) {
-      console.error("Error sending message:", error);
-      toast.error(error.response?.data?.message || "Failed to send message");
+      console.error("Error sending message:", error)
+      toast.error(
+        error.response?.data?.message || "Failed to send message"
+      )
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
+
+  const inputClass =
+    "w-full border-b border-[#dfe4dc] bg-transparent px-0 py-3.5 text-sm text-[#172b27] placeholder:text-[#a0aaa2] outline-none transition-colors duration-300 focus:border-[#294b40]"
+
+  const labelClass =
+    "mb-2 block text-[10px] font-semibold uppercase tracking-[0.2em] text-[#718477]"
+
+  const socialLinks = [
+    { Icon: Instagram, label: "Instagram" },
+    { Icon: Facebook, label: "Facebook" },
+    { Icon: Twitter, label: "Twitter" },
+  ]
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#f8f6f0] font-sans text-[#172b27]">
       <Header />
-      
-      <main className="flex-grow">
-       
 
-        <div className="max-w-5xl mx-auto px-4 py-8 -mt-8 relative z-20 ">
-          <div className="grid grid-cols-1 lg:grid-cols-7 gap-20">
-            {/* Contact Information Cards */}
-            <div className="lg:col-span-3 h-full bg-gradient-to-b from-blue-800/60 to-blue-100 p-5 rounded-xl text-white relative overflow-hidden">
-              <video
-                ref={videoRef}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover mix-blend-screen opacity-70 pointer-events-none"
-              >
-                <source src="/cloud_vid.mp4" type="video/mp4" />
-              </video>
-              <div className="relative z-10 space-y-4">
-              <div className="px-6 pt-4">
-                <motion.h2 
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="text-2xl font-bold text-white"
-                >
-                  Get in Touch
-                </motion.h2>
-                {/* <p className="text-blue-50 text-sm mt-1">We'd love to hear from you.</p> */}
-              </div>
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="px-6 rounded-xl hover:bg-white/10 transition-colors"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  {/* <div className=" rounded-lg flex items-center justify-center text-white"> */}
-                    <Mail className="w-5 h-5" />
-                  {/* </div> */}
-                  <h3 className="text-md font-semibold text-white">Email Us</h3>
-                </div>
-                <p className="text-blue-50 text-xs mb-1 font-medium">Our friendly team is here to help.</p>
-                <a href="mailto:korplz1408@gmail.com" className="text-white font-medium hover:underline text-sm">OfficialBeliefCosmetics.com</a>
-              </motion.div>
+      <main>
+        {/* Hero Section */}
+        <section className="px-5 pb-14 pt-20 md:px-10 md:pb-20 md:pt-28">
+          <div className="mx-auto max-w-7xl text-center">
+            <div className="mb-6 flex items-center justify-center gap-4">
+              <span className="h-px w-8 bg-[#718477]" />
 
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="px-6  rounded-xl hover:bg-white/10 transition-colors"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin className="w-5 h-5" />
-                  <h3 className="text-md font-semibold text-white">Visit Us</h3>
-                </div>
-                <p className="text-blue-50 text-xs mb-1 font-medium">Come say hello at our Store.</p>
-                <p className="text-white font-medium text-sm">Ganpat Bazar, Bhaderwah, J&K </p>
-              </motion.div>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#718477]">
+                Contact Belief
+              </span>
 
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="px-6  rounded-xl hover:bg-white/10 transition-colors"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <Phone className="w-5 h-5" />
-                  <h3 className="text-md font-semibold text-white">Call Us</h3>
-                </div>
-                <p className="text-blue-50 text-xs mb-1 font-medium">Mon - Fri: 9am - 6pm</p>
-                <a href="tel:+91-8130610431" className="text-white font-medium hover:underline text-sm">+91 8130610431</a>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="px-6  rounded-xl"
-              >
-                <h3 className="text-md font-semibold text-white mb-3">Follow Us</h3>
-                <div className="flex gap-4">
-                  <a href="#" className="w-10 h-10  rounded-lg flex items-center justify-center text-white hover:bg-white/80 hover:text-black/20 transition-colors">
-                    <Instagram className="w-6 h-6" />
-                  </a>
-                  <a href="#" className="w-10 h-10  rounded-lg flex items-center justify-center text-white hover:bg-white/80 hover:text-black/20 transition-colors">
-                    <Facebook className="w-6 h-6" />
-                  </a>
-                  <a href="#" className="w-10 h-10 rounded-lg flex items-center justify-center text-white hover:bg-white/80 hover:text-black/20 transition-colors">
-                    <Twitter className="w-6 h-6" />
-                  </a>
-                </div>
-              </motion.div>
-              </div>
+              <span className="h-px w-8 bg-[#718477]" />
             </div>
 
-            {/* Contact Form */}
-            <div className="lg:col-span-4">
-              <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 md:p-8 h-full">
-                <div className="mb-6">
-                  <h2 className="text-xl font-bold text-blue-900 mb-1">Send us a Message</h2>
-                  <p className="text-gray-600 text-sm">Fill out the form below and we'll get back to you as soon as possible.</p>
+            <h1 className="font-editorial text-5xl font-normal leading-[1.05] tracking-tight text-[#172b27] md:text-7xl">
+              Let's start a{" "}
+              <span className="italic text-[#718477]">
+                conversation.
+              </span>
+            </h1>
+
+            <p className="mx-auto mt-6 max-w-xl text-sm leading-7 text-[#879188] md:text-base">
+              We're always happy to hear from you. Whether you have a
+              question, feedback, or need assistance, our team is here
+              to help.
+            </p>
+          </div>
+        </section>
+
+        {/* Contact Content */}
+        <section className="px-5 pb-20 md:px-10 md:pb-28">
+          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
+
+            {/* Contact Information */}
+            <aside className="lg:col-span-4">
+              <div className="border-t border-[#dfe4dc] pt-7">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#718477]">
+                  Get in touch
+                </span>
+
+                <h2 className="mt-5 font-editorial text-4xl font-normal leading-tight text-[#172b27] md:text-5xl">
+                  We'd love to{" "}
+                  <span className="italic text-[#718477]">
+                    hear from you.
+                  </span>
+                </h2>
+
+                <p className="mt-5 max-w-sm text-sm leading-7 text-[#879188]">
+                  Have questions about our products or need help with
+                  something? Reach out to us through any of the
+                  following channels.
+                </p>
+              </div>
+
+              {/* Contact Details */}
+              <div className="mt-12">
+
+                {/* Email */}
+                <div className="flex items-start gap-5 border-b border-[#dfe4dc] py-7 first:border-t">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center border border-[#dfe4dc] text-[#294b40]">
+                    <Mail size={18} strokeWidth={1.4} />
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#718477]">
+                      Email us
+                    </p>
+
+                    <a
+                      href="mailto:korplz1408@gmail.com"
+                      className="mt-2 block break-all text-sm text-[#172b27] transition-colors hover:text-[#718477]"
+                    >
+                      OfficialBeliefCosmetics.com
+                    </a>
+
+                    <p className="mt-2 text-xs text-[#879188]">
+                      Our friendly team is here to help.
+                    </p>
+                  </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Address */}
+                <div className="flex items-start gap-5 border-b border-[#dfe4dc] py-7">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center border border-[#dfe4dc] text-[#294b40]">
+                    <MapPin size={18} strokeWidth={1.4} />
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#718477]">
+                      Visit us
+                    </p>
+
+                    <p className="mt-2 text-sm leading-6 text-[#172b27]">
+                      Ganpat Bazar, Bhaderwah, J&K
+                    </p>
+
+                    <p className="mt-2 text-xs text-[#879188]">
+                      Come say hello at our store.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Phone */}
+                <div className="flex items-start gap-5 border-b border-[#dfe4dc] py-7">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center border border-[#dfe4dc] text-[#294b40]">
+                    <Phone size={18} strokeWidth={1.4} />
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#718477]">
+                      Call us
+                    </p>
+
+                    <a
+                      href="tel:+918130610431"
+                      className="mt-2 block text-sm text-[#172b27] transition-colors hover:text-[#718477]"
+                    >
+                      +91 8130610431
+                    </a>
+
+                    <p className="mt-2 text-xs text-[#879188]">
+                      Monday – Friday: 9AM – 6PM
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Links */}
+              <div className="mt-9">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#718477]">
+                  Follow us
+                </p>
+
+                <div className="mt-5 flex gap-3">
+                  {socialLinks.map(({ Icon, label }) => (
+                    <a
+                      key={label}
+                      href="#"
+                      aria-label={label}
+                      className="flex h-10 w-10 items-center justify-center border border-[#dfe4dc] text-[#294b40] transition-all duration-300 hover:border-[#172b27] hover:bg-[#172b27] hover:text-[#f8f6f0]"
+                    >
+                      <Icon size={17} strokeWidth={1.5} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </aside>
+
+            {/* Contact Form */}
+            <div className="lg:col-span-8">
+              <div className="border border-[#dfe4dc] bg-white/50 p-6 sm:p-9 md:p-12">
+
+                {/* Form Heading */}
+                <div className="mb-10 border-b border-[#dfe4dc] pb-8">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#718477]">
+                    Your message matters
+                  </span>
+
+                  <h2 className="mt-3 font-editorial text-3xl font-normal text-[#172b27] md:text-4xl">
+                    Send us a message
+                  </h2>
+
+                  <p className="mt-3 text-xs leading-6 text-[#879188]">
+                    Fill in your details and tell us how we can help.
+                  </p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-9">
+
+                  {/* Name and Email */}
+                  <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="name" className="block text-xs font-medium text-gray-700 mb-1.5">
-                        Full Name
+                      <label htmlFor="name" className={labelClass}>
+                        Full name *
                       </label>
+
                       <input
                         id="name"
                         name="name"
@@ -179,14 +270,19 @@ export default function ContactPage() {
                         value={formData.name}
                         onChange={handleChange}
                         disabled={!!authUser}
-                        className={`w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none bg-gray-50 focus:bg-white text-sm ${authUser ? 'opacity-70 cursor-not-allowed bg-gray-100' : ''}`}
-                        placeholder="John Doe"
+                        className={`${inputClass} ${authUser
+                            ? "cursor-not-allowed opacity-60"
+                            : ""
+                          }`}
+                        placeholder="Your full name"
                       />
                     </div>
+
                     <div>
-                      <label htmlFor="email" className="block text-xs font-medium text-blue-900 mb-1.5">
-                        Email Address
+                      <label htmlFor="email" className={labelClass}>
+                        Email address *
                       </label>
+
                       <input
                         id="email"
                         name="email"
@@ -195,85 +291,85 @@ export default function ContactPage() {
                         value={formData.email}
                         onChange={handleChange}
                         disabled={!!authUser}
-                        className={`w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none bg-gray-50 focus:bg-white text-sm ${authUser ? 'opacity-70 cursor-not-allowed bg-gray-100' : ''}`}
-                        placeholder="john@example.com"
+                        className={`${inputClass} ${authUser
+                            ? "cursor-not-allowed opacity-60"
+                            : ""
+                          }`}
+                        placeholder="your@email.com"
                       />
                     </div>
                   </div>
 
+                  {/* Subject */}
                   <div>
-                    <label htmlFor="subject" className="block text-xs font-medium text-blue-900 mb-1.5">
+                    <label htmlFor="subject" className={labelClass}>
                       Subject
                     </label>
+
                     <input
                       id="subject"
                       name="subject"
                       type="text"
                       value={formData.subject}
                       onChange={handleChange}
-                      className="w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none bg-gray-50 focus:bg-white text-sm"
+                      className={inputClass}
                       placeholder="How can we help you?"
                     />
                   </div>
 
+                  {/* Message */}
                   <div>
-                    <label htmlFor="message" className="block text-xs font-medium text-blue-900 mb-1.5">
-                      Message
+                    <label htmlFor="message" className={labelClass}>
+                      Your message *
                     </label>
+
                     <textarea
                       id="message"
                       name="message"
-                      rows={4}
+                      rows={5}
                       required
                       value={formData.message}
                       onChange={handleChange}
-                      className="w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none bg-gray-50 focus:bg-white resize-none text-sm"
+                      className={`${inputClass} resize-y`}
                       placeholder="Tell us more about your inquiry..."
                     />
                   </div>
 
-                  <div className="mt-6">
+                  {/* Submit Button */}
+                  <div className="pt-2">
                     <button
                       type="submit"
                       disabled={loading}
-                      className="group relative w-full md:w-[220px] inline-flex items-center justify-center px-6 py-3 md:px-8 md:py-4 text-base md:text-lg font-medium rounded-full text-white bg-blue-900 hover:bg-blue-800 shadow-md transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+                      className="group flex w-full items-center justify-between bg-[#172b27] px-6 py-4 text-[#f8f6f0] transition-colors duration-300 hover:bg-[#294b40] disabled:cursor-not-allowed disabled:opacity-60 sm:w-[260px]"
                     >
-                      <span className="pointer-events-none mr-8 text-sm">{loading ? "Sending..." : "Send Message"}</span>
-                      <span
-                        className="absolute right-2 top-1/2 -translate-y-1/2 
-                                     bg-white text-blue-900 rounded-full p-2 md:p-2
-                                     flex items-center justify-center overflow-hidden"
-                      >
-                        {loading ? (
-                           <div className="w-5 h-5 border-2 border-blue-900 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                           <Send className="w-5 h-5 arrow-icon" />
-                        )}
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">
+                        {loading ? "Sending..." : "Send Message"}
                       </span>
+
+                      {loading ? (
+                        <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#f8f6f0] border-t-transparent" />
+                      ) : (
+                        <ArrowUpRight
+                          size={19}
+                          strokeWidth={1.5}
+                          className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1"
+                        />
+                      )}
                     </button>
-                    <style>{`
-                      @keyframes arrow-slide {
-                        0% { transform: translate(0, 0); opacity: 1; }
-                        45% { transform: translate(100%, -100%); opacity: 0; }
-                        50% { transform: translate(-100%, 100%); opacity: 0; }
-                        55% { transform: translate(-100%, 100%); opacity: 0; }
-                        100% { transform: translate(0, 0); opacity: 1; }
-                      }
-                      .group:hover .arrow-icon {
-                        animation: arrow-slide 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-                      }
-                    `}</style>
+
+                    <p className="mt-5 text-[10px] leading-5 text-[#879188]">
+                      Thank you for reaching out to Belief Cosmetics.
+                      We look forward to connecting with you.
+                    </p>
                   </div>
                 </form>
               </div>
             </div>
           </div>
-        </div>
+        </section>
       </main>
 
       <Footer />
     </div>
-  );
+  )
 }
-
-

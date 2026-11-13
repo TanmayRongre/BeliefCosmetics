@@ -239,15 +239,15 @@ export const getProductCategories = async (req, res) => {
     const defaultFallbacks = {
       "Face Wash": "/Facewash.jpg",
       "Bath Salt": "/Bathsalt.jpg",
-      "Ubtan": "/Ubtan.jpg",
-      "Soap": "/Soap.jpg",
-      "Gel": "/Gel.jpg",
+      Ubtan: "/Ubtan.jpg",
+      Soap: "/Soap.jpg",
+      Gel: "/Gel.jpg",
       "Fragrance Balm": "/FragranceBalm.jpg",
     };
 
     const dbCategories = await Product.distinct("category");
     const combinedCategories = Array.from(
-      new Set([...ALLOWED_CATEGORIES, ...dbCategories])
+      new Set([...ALLOWED_CATEGORIES, ...dbCategories]),
     ).filter(Boolean);
 
     const categories = await Promise.all(
@@ -257,7 +257,7 @@ export const getProductCategories = async (req, res) => {
             category: { $regex: new RegExp(`^${cat}$`, "i") },
             images: { $exists: true, $not: { $size: 0 } },
           },
-          "name category images price featured"
+          "name category images price featured",
         ).sort({ featured: -1, createdAt: -1 });
 
         const count = await Product.countDocuments({
@@ -266,7 +266,7 @@ export const getProductCategories = async (req, res) => {
 
         const image =
           product?.images?.find(
-            (img) => img && typeof img === "string" && img.trim().length > 0
+            (img) => img && typeof img === "string" && img.trim().length > 0,
           ) ||
           defaultFallbacks[cat] ||
           "/Soap.jpg";
@@ -278,11 +278,11 @@ export const getProductCategories = async (req, res) => {
           productId: product?._id || null,
           count,
         };
-      })
+      }),
     );
 
     const result = categories.filter(
-      (c) => ALLOWED_CATEGORIES.includes(c.name) || c.count > 0
+      (c) => ALLOWED_CATEGORIES.includes(c.name) || c.count > 0,
     );
 
     res.json(result);
