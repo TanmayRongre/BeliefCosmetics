@@ -1,12 +1,40 @@
+import { useState, useEffect } from "react";
+import axiosInstance from "../../lib/axios";
+
 export default function CategoriesSection() {
-  const categories = [
-    { id: 1, name: "Face Wash", productCount: 8, status: "Active" },
-    { id: 2, name: "Bath Salt", productCount: 6, status: "Active" },
-    { id: 3, name: "Ubtan", productCount: 5, status: "Active" },
-    { id: 4, name: "Soap", productCount: 12, status: "Active" },
-    { id: 5, name: "Gel", productCount: 4, status: "Active" },
-    { id: 6, name: "Fragrance Balm", productCount: 3, status: "Active" },
-  ]
+  const [categories, setCategories] = useState([
+    { id: 1, name: "Face Wash", productCount: 0, status: "Active" },
+    { id: 2, name: "Bath Salt", productCount: 0, status: "Active" },
+    { id: 3, name: "Ubtan", productCount: 0, status: "Active" },
+    { id: 4, name: "Soap", productCount: 0, status: "Active" },
+    { id: 5, name: "Gel", productCount: 0, status: "Active" },
+    { id: 6, name: "Fragrance Balm", productCount: 0, status: "Active" },
+  ]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchCategoryCounts = async () => {
+      try {
+        const res = await axiosInstance.get("/products/categories");
+        if (isMounted && Array.isArray(res.data)) {
+          const mapped = res.data.map((cat, idx) => ({
+            id: cat.productId || idx + 1,
+            name: cat.name,
+            productCount: cat.count || 0,
+            status: cat.count > 0 ? "Active" : "Empty",
+          }));
+          setCategories(mapped);
+        }
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+
+    fetchCategoryCounts();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="p-8">

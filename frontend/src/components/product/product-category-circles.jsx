@@ -1,15 +1,39 @@
-import { useRef } from "react";
+import { useState, useEffect } from "react";
 import LogoLoop from "../ui/LogoLoop";
+import axiosInstance from "../../lib/axios";
+
+const DEFAULT_CATEGORIES = [
+  { name: "Face Wash", image: "/Facewash.jpg" },
+  { name: "Bath Salt", image: "/Bathsalt.jpg" },
+  { name: "Ubtan", image: "/Ubtan.jpg" },
+  { name: "Soap", image: "/Soap.jpg" },
+  { name: "Gel", image: "/Gel.jpg" },
+  { name: "Fragrance Balm", image: "/FragranceBalm.jpg" },
+];
 
 export default function ProductCategoryCircles({ filters, setFilters }) {
-  const categories = [
-    { name: "Face Wash", image: "/Facewash.jpg" },
-    { name: "Bath Salt", image: "/Bathsalt.jpg" },
-    { name: "Ubtan", image: "/Ubtan.jpg" },
-    { name: "Soap", image: "/Soap.jpg" },
-    { name: "Gel", image: "/Gel.jpg" },
-    { name: "Fragrance Balm", image: "/FragranceBalm.jpg" },
-  ];
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchCategories = async () => {
+      try {
+        const res = await axiosInstance.get("/products/categories");
+        if (isMounted && Array.isArray(res.data) && res.data.length > 0) {
+          setCategories(res.data);
+        }
+      } catch (err) {
+        console.error("Error fetching categories from database:", err);
+      }
+    };
+
+    fetchCategories();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleCategoryClick = (categoryName) => {
     // Single-select behavior as requested:
@@ -61,6 +85,10 @@ export default function ProductCategoryCircles({ filters, setFilters }) {
                   <img
                     src={cat.image}
                     alt={cat.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/Soap.jpg";
+                    }}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover/btn:scale-110"
                   />
                 </div>

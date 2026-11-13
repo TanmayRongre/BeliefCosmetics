@@ -1,5 +1,14 @@
 import express from "express";
-import { createProduct, getAllProducts, getProductById, updateProduct, bulkCreateProducts, deleteDuplicateProducts, deleteProduct } from "../controllers/product.controller.js";
+import {
+  createProduct,
+  getAllProducts,
+  getProductCategories,
+  getProductById,
+  updateProduct,
+  bulkCreateProducts,
+  deleteDuplicateProducts,
+  deleteProduct,
+} from "../controllers/product.controller.js";
 import { protectRoute, adminRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -7,6 +16,7 @@ const router = express.Router();
 router.post("/", protectRoute, adminRoute, createProduct);
 router.post("/bulk", protectRoute, adminRoute, bulkCreateProducts);
 router.get("/", getAllProducts);
+router.get("/categories", getProductCategories);
 router.get("/:id", getProductById);
 router.put("/:id", protectRoute, adminRoute, updateProduct);
 

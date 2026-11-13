@@ -234,6 +234,64 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
+export const getProductCategories = async (req, res) => {
+  try {
+    const defaultFallbacks = {
+      "Face Wash": "/Facewash.jpg",
+      "Bath Salt": "/Bathsalt.jpg",
+      "Ubtan": "/Ubtan.jpg",
+      "Soap": "/Soap.jpg",
+      "Gel": "/Gel.jpg",
+      "Fragrance Balm": "/FragranceBalm.jpg",
+    };
+
+    const dbCategories = await Product.distinct("category");
+    const combinedCategories = Array.from(
+      new Set([...ALLOWED_CATEGORIES, ...dbCategories])
+    ).filter(Boolean);
+
+    const categories = await Promise.all(
+      combinedCategories.map(async (cat) => {
+        const product = await Product.findOne(
+          {
+            category: { $regex: new RegExp(`^${cat}$`, "i") },
+            images: { $exists: true, $not: { $size: 0 } },
+          },
+          "name category images price featured"
+        ).sort({ featured: -1, createdAt: -1 });
+
+        const count = await Product.countDocuments({
+          category: { $regex: new RegExp(`^${cat}$`, "i") },
+        });
+
+        const image =
+          product?.images?.find(
+            (img) => img && typeof img === "string" && img.trim().length > 0
+          ) ||
+          defaultFallbacks[cat] ||
+          "/Soap.jpg";
+
+        return {
+          name: cat,
+          image,
+          productName: product?.name || null,
+          productId: product?._id || null,
+          count,
+        };
+      })
+    );
+
+    const result = categories.filter(
+      (c) => ALLOWED_CATEGORIES.includes(c.name) || c.count > 0
+    );
+
+    res.json(result);
+  } catch (error) {
+    console.error("Error fetching product categories:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 export const getProductById = async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(

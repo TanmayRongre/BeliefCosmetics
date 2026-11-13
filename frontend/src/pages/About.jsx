@@ -1,83 +1,223 @@
-import React from 'react'
-import Header from "@/components/layout/header"
-import Footer from "@/components/layout/footer"
-import { Users, Award, Leaf, Heart, ArrowRight, Microscope, ScanLine, ShieldCheck, Sparkles, FlaskConical, Fingerprint, ShieldAlert } from "lucide-react"
-import { motion } from "framer-motion"
-import { Link } from 'react-router-dom'
+
+import React from "react";
+import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
+import {
+  Users,
+  Award,
+  Leaf,
+  Heart,
+  ArrowRight,
+  Microscope,
+  ScanLine,
+  ShieldCheck,
+  FlaskConical,
+  Fingerprint,
+  ShieldAlert,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-}
+    transition: { staggerChildren: 0.1 },
+  },
+};
 
 const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
+  hidden: { y: 24, opacity: 0 },
   visible: {
     y: 0,
     opacity: 1,
-    transition: {
-      duration: 0.5
-    }
-  }
+    transition: { duration: 0.65, ease: "easeOut" },
+  },
+};
+
+const values = [
+  {
+    icon: Award,
+    title: "Quality First",
+    desc: "Every formula is tested for safety, stability, and skin compatibility.",
+  },
+  {
+    icon: Leaf,
+    title: "Conscious & Responsible",
+    desc: "We choose ingredients and packaging that reduce unnecessary harm.",
+  },
+  {
+    icon: Users,
+    title: "Inclusive by Design",
+    desc: "Products created for different skin types, tones, and concerns.",
+  },
+  {
+    icon: Heart,
+    title: "Honest Communication",
+    desc: "We don’t promise overnight miracles. We promise consistency and care.",
+  },
+];
+
+const skinFactors = [
+  { icon: Fingerprint, label: "Your specific Skin Type" },
+  { icon: Microscope, label: "Unique Skin Concerns" },
+  { icon: ShieldAlert, label: "Sensitivities & Allergies" },
+];
+
+const problems = [
+  {
+    title: "Confusion",
+    description:
+      "Struggling to choose the right product for your unique needs.",
+  },
+  {
+    title: "Mystery",
+    description:
+      "Not understanding ingredients or what they actually do.",
+  },
+  {
+    title: "Reactions",
+    description:
+      "Dealing with breakouts caused by wrong formulations.",
+  },
+];
+
+const sciencePoints = [
+  "Balanced concentrations",
+  "Skin-barrier friendly",
+  "No harsh combinations",
+];
+
+const transparencyPoints = [
+  "Every ingredient listed",
+  "Clear purpose explained",
+  "Sensitivity warnings highlighted",
+];
+
+function SectionLabel({ children, light = false }) {
+  return (
+    <div
+      className={`inline-flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.24em] ${light ? "text-white/80" : "text-[#718477]"
+        }`}
+    >
+      <span
+        className={`h-px w-8 ${light ? "bg-white/70" : "bg-[#718477]"
+          }`}
+      />
+      {children}
+    </div>
+  );
+}
+
+function ArrowButton({ to, children, icon: Icon = ArrowRight }) {
+  return (
+    <Link
+      to={to}
+      className="group inline-flex items-center justify-between gap-8 rounded-full bg-[#172b27] py-2 pl-7 pr-2 text-sm font-medium text-white transition-all duration-300 hover:bg-[#294b40] hover:shadow-lg"
+    >
+      <span>{children}</span>
+      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f8f6f0] text-[#172b27] transition-transform duration-300 group-hover:rotate-[-35deg]">
+        <Icon className="h-4 w-4" />
+      </span>
+    </Link>
+  );
+}
+
+function FeatureCard({ icon: Icon, title, description, points, delay = 0 }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay }}
+      className="group rounded-2xl border border-[#e7eae3] bg-[#f8f6f0] p-7 transition-all duration-300 hover:-translate-y-1 hover:border-[#718477]/50 hover:shadow-[0_18px_45px_rgba(23,43,39,0.07)] md:p-9"
+    >
+      <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-full bg-[#e9eee7] text-[#294b40] transition-colors duration-300 group-hover:bg-[#172b27] group-hover:text-white">
+        <Icon className="h-6 w-6" strokeWidth={1.5} />
+      </div>
+
+      <h3 className="mb-4 font-editorial text-3xl leading-tight text-[#172b27]">
+        {title}
+      </h3>
+
+      <p className="mb-7 text-sm leading-7 text-[#718077]">
+        {description}
+      </p>
+
+      <ul className="space-y-3 border-t border-[#e2e7df] pt-6">
+        {points.map((point) => (
+          <li
+            key={point}
+            className="flex items-center gap-3 text-sm text-[#43564d]"
+          >
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#718477]" />
+            {point}
+          </li>
+        ))}
+      </ul>
+    </motion.div>
+  );
 }
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden bg-[#f8f6f0] text-[#172b27]">
       <Header />
 
-      {/* Hero Section */}
-      <section className="relative py-20 md:py-32 overflow-hidden min-h-[60vh] flex items-center justify-center">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src="/about.jpg"
-            alt="About Background"
-            className="w-full h-full object-cover grayscale-[20%]"
-          />
-          <div className="absolute inset-0 bg-white/75" />
-        </div>
+      {/* Hero */}
+      <section className="relative flex min-h-[620px] items-center overflow-hidden md:min-h-[720px]">
+        <img
+          src="/about.jpg"
+          alt="Belief Cosmetics skincare"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
 
-        <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent pointer-events-none z-10" />
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
+        <div className="absolute inset-0 bg-[#f8f6f0]/75" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#f8f6f0]/95 via-[#f8f6f0]/65 to-transparent" />
+
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-28 md:px-12">
           <motion.div
             initial="hidden"
             animate="visible"
             variants={containerVariants}
-            className="text-center max-w-4xl mx-auto mb-10"
+            className="max-w-4xl"
           >
+            <motion.div variants={itemVariants}>
+              <SectionLabel>Our Philosophy</SectionLabel>
+            </motion.div>
+
             <motion.h1
-              className="text-6xl md:text-8xl font-bold mb-6 tracking-tight bg-cover bg-center text-transparent"
-              style={{
-                backgroundImage: "linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('/about.jpg')",
-                WebkitBackgroundClip: "text",
-                backgroundClip: "text",
-                backgroundPosition: "center",
-                backgroundSize: "cover"
-              }}
-              initial={{ opacity: 0, y: -30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              variants={itemVariants}
+              className="mt-8 max-w-4xl font-editorial text-6xl leading-[0.98] tracking-tight text-[#172b27] sm:text-7xl md:text-8xl lg:text-[104px]"
             >
-              Skincare That Understands <br /> Your Skin
+              Skincare That
+              <br />
+              Understands
+              <br />
+              <span className="italic text-[#718477]">Your Skin.</span>
             </motion.h1>
+
             <motion.p
               variants={itemVariants}
-              className="text-xl md:text-lg text-muted-foreground leading-relaxed"
+              className="mt-8 max-w-xl text-base leading-8 text-[#58685e] md:text-lg"
             >
-              At Belief Cosmetics, we believe skincare should be personal, transparent, and backed by real science — not trends.
-              Every skin is different, and your skincare should be too.
+              At Belief Cosmetics, we believe skincare should be personal,
+              transparent, and backed by real science — not trends. Every skin
+              is different, and your skincare should be too.
             </motion.p>
+
+            <motion.div variants={itemVariants} className="mt-9">
+              <ArrowButton to="/products">
+                Discover our products
+              </ArrowButton>
+            </motion.div>
           </motion.div>
         </div>
+
+        <div className="absolute bottom-0 right-0 hidden h-24 w-1/3 rounded-tl-[100%] bg-[#f8f6f0]/50 md:block" />
       </section>
 
-      <main className="max-w-7xl mx-auto px-4 pb-20 mt-20 px-10">
+      <main className="mx-auto max-w-7xl px-6 pb-24 md:px-12">
 
         {/* Why We Started */}
         <motion.section
@@ -85,255 +225,216 @@ export default function About() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={containerVariants}
-          className="mb-32 max-w-7xl mx-auto"
+          className="grid items-center gap-14 py-24 md:grid-cols-2 md:gap-20 md:py-32"
         >
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Left Content */}
-            <motion.div variants={itemVariants} className="space-y-8 text-left pr-0 md:pr-12">
-              <div className="inline-flex items-center space-x-2 text-primary font-semibold tracking-wide uppercase text-sm">
-                <span className="w-8 h-[2px] bg-primary"></span>
-                <span>Why We Started</span>
-              </div>
+          <motion.div variants={itemVariants} className="max-w-xl">
+            <SectionLabel>Why We Started</SectionLabel>
 
-              <h2 className="text-4xl md:text-5xl font-bold leading-[1.1] text-blue-950">
-                The Industry Was <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-900 to-blue-600">Missing Something</span>
-              </h2>
+            <h2 className="mt-7 font-editorial text-5xl leading-[1.05] text-[#172b27] md:text-6xl">
+              The Industry Was
+              <br />
+              <span className="italic text-[#718477]">
+                Missing Something.
+              </span>
+            </h2>
 
-              <p className="text-slate-600 text-lg leading-relaxed font-light">
-                The skincare industry is crowded with promises — but too often, products are sold without understanding the person using them.
+            <p className="mt-8 text-base leading-8 text-[#718077]">
+              The skincare industry is crowded with promises — but too often,
+              products are sold without understanding the person using them.
+            </p>
+
+            <div className="mt-9 border-l border-[#718477] py-2 pl-6">
+              <p className="font-editorial text-2xl italic leading-relaxed text-[#294b40] md:text-3xl">
+                “Belief Cosmetics was created to change that — by putting skin
+                understanding first.”
               </p>
+            </div>
+          </motion.div>
 
-              <div className="relative pl-6 border-l-4 border-blue-200">
-                <p className="text-blue-900 font-medium text-xl italic">
-                  "Belief Cosmetics was created to change that — by putting skin understanding first."
-                </p>
-              </div>
-            </motion.div>
+          <motion.div
+            variants={itemVariants}
+            className="relative min-h-[540px] overflow-hidden rounded-2xl"
+          >
+            <img
+              src="/image7.avif"
+              alt="Skincare confusion"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
 
-            {/* Right Image with Overlay Cards */}
-            <motion.div variants={itemVariants} className="relative h-[500px] rounded-3xl overflow-hidden group">
-              <img
-                src="/image7.avif"
-                alt="Skincare confusion"
-                className="w-full h-full object-cover grayscale-[30%] brightness-[100%] transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-black/20" />
+            <div className="absolute inset-0 bg-[#172b27]/25" />
 
-              {/* Overlay Cards */}
-              <div className="absolute inset-0 flex flex-col justify-center items-center gap-6 p-6">
+            <div className="relative flex min-h-[540px] flex-col items-center justify-center gap-5 p-7">
+              {problems.map((problem, index) => (
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="bg-white/40 backdrop-blur-sm p-6 rounded-xl shadow-lg w-full max-w-xs transform translate-x-4 border border-white/30"
+                  key={problem.title}
+                  initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.55, delay: index * 0.12 }}
+                  className={`w-full max-w-sm rounded-xl border border-white/50 bg-[#f8f6f0]/85 p-6 shadow-xl backdrop-blur-md ${index === 1 ? "md:-translate-x-5" : "md:translate-x-5"
+                    }`}
                 >
-                  <span className="text-red-500 font-bold text-xl block mb-2">❌ Confusion</span>
-                  <p className="text-sm text-gray-700">Struggling to choose the right product for your unique needs.</p>
+                  <div className="mb-2 flex items-center gap-3">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#e8ece5] text-sm text-[#718477]">
+                      0{index + 1}
+                    </span>
+                    <h3 className="font-editorial text-2xl text-[#172b27]">
+                      {problem.title}
+                    </h3>
+                  </div>
+                  <p className="pl-10 text-sm leading-6 text-[#718077]">
+                    {problem.description}
+                  </p>
                 </motion.div>
-
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="bg-white/40 backdrop-blur-sm p-6 rounded-xl shadow-lg w-full max-w-xs transform -translate-x-4 border border-white/30"
-                >
-                  <span className="text-red-500 font-bold text-xl block mb-2">❌ Mystery</span>
-                  <p className="text-sm text-gray-700">Not understanding ingredients or what they actually do.</p>
-                </motion.div>
-
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="bg-white/40 backdrop-blur-sm p-6 rounded-xl shadow-lg w-full max-w-xs transform translate-x-4 border border-white/30"
-                >
-                  <span className="text-red-500 font-bold text-xl block mb-2">❌ Reactions</span>
-                  <p className="text-sm text-gray-700">Dealing with breakouts caused by wrong formulations.</p>
-                </motion.div>
-              </div>
-            </motion.div>
-          </div>
+              ))}
+            </div>
+          </motion.div>
         </motion.section>
 
-        {/* Our Approach (Skin Analyzer) */}
+        {/* Our Approach */}
         <motion.section
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, margin: "-80px" }}
           variants={containerVariants}
-          className="grid md:grid-cols-2 gap-16 items-center mb-32"
+          className="grid items-center gap-14 border-t border-[#e7eae3] py-24 md:grid-cols-2 md:gap-20 md:py-32"
         >
           <motion.div
             variants={itemVariants}
-            className="relative group order-2 md:order-1"
+            className="relative order-2 md:order-1"
           >
-            <div className="absolute inset-0 bg-blue-500/10 rounded-2xl transform -rotate-3 transition-transform group-hover:-rotate-6 duration-300" />
-            <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl">
+            <div className="absolute -bottom-5 -left-5 h-2/3 w-2/3 rounded-2xl bg-[#e9eee7]" />
+
+            <div className="relative h-[430px] overflow-hidden rounded-2xl md:h-[540px]">
               <img
                 src="https://assets.conversion.ai/i/01766a4d-d92c-4323-9429-c78d860188c9?utm_source=chatgpt.com"
-                alt="Personalized Skincare Analysis"
-                className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
+                alt="Personalized skincare analysis"
+                className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-8">
-                <div className="text-white">
-                  <div className="flex items-center gap-2 mb-2">
-                    <ScanLine className="w-6 h-6 text-blue-400" />
-                    <p className="font-bold text-lg">Smart Skin Analysis</p>
-                  </div>
-                  <p className="text-white/80 text-sm">Precision recommendations for your unique profile.</p>
+
+              <div className="absolute inset-0 bg-gradient-to-t from-[#172b27]/80 via-transparent to-transparent" />
+
+              <div className="absolute bottom-0 left-0 p-8 md:p-10">
+                <div className="mb-3 flex items-center gap-3 text-white">
+                  <ScanLine className="h-6 w-6 text-[#c5d2c4]" />
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em]">
+                    Smart Skin Analysis
+                  </span>
                 </div>
+                <p className="max-w-xs font-editorial text-3xl leading-tight text-white md:text-4xl">
+                  A more personal approach to skincare.
+                </p>
               </div>
             </div>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="space-y-8 order-1 md:order-2">
-            <div className="inline-flex items-center space-x-2 text-primary font-semibold tracking-wide uppercase text-sm">
-              <span className="w-8 h-[2px] bg-primary"></span>
-              <span>Our Approach</span>
-            </div>
+          <motion.div
+            variants={itemVariants}
+            className="order-1 md:order-2"
+          >
+            <SectionLabel>Our Approach</SectionLabel>
 
-            <h2 className="text-4xl md:text-5xl font-bold leading-[1.1] text-blue-950">
-              Skin First, <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-900 to-blue-600">Always</span>
+            <h2 className="mt-7 font-editorial text-5xl leading-[1.05] text-[#172b27] md:text-6xl">
+              Skin First,
+              <br />
+              <span className="italic text-[#718477]">Always.</span>
             </h2>
 
-            <p className="text-slate-600 text-lg leading-relaxed font-light">
-              We don’t believe in one-size-fits-all skincare. That’s why we built a Skin Analyzer that looks at:
+            <p className="mt-8 text-base leading-8 text-[#718077]">
+              We don’t believe in one-size-fits-all skincare. That’s why we
+              built a Skin Analyzer that looks at:
             </p>
 
-            <ul className="space-y-2">
-              <li className="flex items-center gap-3 text-lg font-medium text-blue-900">
-                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                  <Fingerprint className="w-5 h-5" />
+            <div className="mt-8 space-y-5">
+              {skinFactors.map(({ icon: Icon, label }) => (
+                <div key={label} className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#e9eee7] text-[#294b40]">
+                    <Icon className="h-5 w-5" strokeWidth={1.5} />
+                  </div>
+                  <span className="text-sm font-medium text-[#294b40] md:text-base">
+                    {label}
+                  </span>
                 </div>
-                Your specific Skin Type
-              </li>
-              <li className="flex items-center gap-3 text-lg font-medium text-blue-900">
-                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                  <Microscope className="w-5 h-5" />
-                </div>
-                Unique Skin Concerns
-              </li>
-              <li className="flex items-center gap-3 text-lg font-medium text-blue-900">
-                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                  <ShieldAlert className="w-5 h-5" />
-                </div>
-                Sensitivities & Allergies
-              </li>
-            </ul>
-            <p className="text-muted-foreground text-lg leading-relaxed pt-2">
-              Based on this, we recommend products that actually make sense for your skin — not just what’s trending.
+              ))}
+            </div>
+
+            <p className="mt-8 text-sm leading-7 text-[#718077]">
+              Based on this, we recommend products that actually make sense
+              for your skin — not just what’s trending.
             </p>
-            <div >
-              <Link to="/skin-analyzer" className="group relative w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 text-lg font-medium rounded-full text-white bg-blue-900 hover:bg-blue-800 shadow-md transition-all duration-300">
-                <span className="pointer-events-none mr-8">Try the Skin Analyzer</span>
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-white text-blue-900 rounded-full p-2 flex items-center justify-center">
-                  <ArrowRight className="w-5 h-5 arrow-icon" />
-                </span>
-              </Link>
+
+            <div className="mt-9">
+              <ArrowButton to="/skin-analyzer" icon={ScanLine}>
+                Try the Skin Analyzer
+              </ArrowButton>
             </div>
           </motion.div>
         </motion.section>
 
-        {/* Why Us Parallax Section */}
+        {/* Science & Transparency */}
         <section
-          className="relative bg-center bg-cover md:bg-fixed mb-32 rounded-3xl overflow-hidden"
-          style={{
-            backgroundImage: "url('/image10.jpg')"
-          }}
+          className="relative mb-24 overflow-hidden rounded-2xl bg-cover bg-center md:mb-32"
+          style={{ backgroundImage: "url('/image10.jpg')" }}
         >
-          {/* Overlay for readability */}
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 bg-[#172b27]/80" />
 
-          {/* Content */}
-          <div className="relative z-10 max-w-6xl mx-auto px-6 py-24">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center space-x-2 text-white font-semibold tracking-wide uppercase text-sm mb-4 bg-white/20 px-4 py-1.5 rounded-full backdrop-blur-sm">
-                <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-                <span>Why Us</span>
-              </div>
-              <h2 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-200 drop-shadow-md">
-                Science & Transparency
+          <div className="relative z-10 mx-auto max-w-6xl px-6 py-20 md:px-12 md:py-28">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="mx-auto mb-14 max-w-2xl text-center"
+            >
+              <SectionLabel light>Why Belief</SectionLabel>
+
+              <h2 className="mt-6 font-editorial text-5xl leading-tight text-white md:text-7xl">
+                Science & <span className="italic text-[#c5d2c4]">Transparency.</span>
               </h2>
-            </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Card 1 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="bg-white/60 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50 hover:bg-white/90 transition-colors duration-300"
-              >
-                <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center mb-6">
-                  <FlaskConical className="w-7 h-7 text-blue-600" />
-                </div>
-                <h3 className="text-2xl font-bold mb-4 text-blue-900">
-                  Powered by Science, Kept Simple
-                </h3>
-                <p className="text-slate-600 mb-6 leading-relaxed">
-                  Our formulations are created using dermatologically studied
-                  ingredients and clean, well-researched actives.
-                </p>
-                <ul className="space-y-3 text-slate-700">
-                  <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                    Balanced concentrations
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                    Skin-barrier friendly
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                    No harsh combinations
-                  </li>
-                </ul>
-              </motion.div>
+              <p className="mx-auto mt-5 max-w-lg text-sm leading-7 text-white/70">
+                Thoughtful skincare begins with understanding what goes into
+                every product and why it matters.
+              </p>
+            </motion.div>
 
-              {/* Card 2 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="bg-white/60 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/50 hover:bg-white/90 transition-colors duration-300"
-              >
-                <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mb-6">
-                  <ShieldCheck className="w-7 h-7 text-green-600" />
-                </div>
-                <h3 className="text-2xl font-bold mb-4 text-blue-900">
-                  Radical Transparency
-                </h3>
-                <p className="text-slate-600 mb-6 leading-relaxed">
-                  We believe you deserve to know what you’re putting on your skin. No hidden formulas. No confusing claims.
-                </p>
-                <ul className="space-y-3 text-slate-700">
-                  <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                    Every ingredient listed
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                    Clear purpose explained
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                    Sensitivity warnings highlighted
-                  </li>
-                </ul>
-              </motion.div>
+            <div className="grid gap-6 md:grid-cols-2">
+              <FeatureCard
+                icon={FlaskConical}
+                title="Powered by Science, Kept Simple"
+                description="Our formulations are created using dermatologically studied ingredients and clean, well-researched actives."
+                points={sciencePoints}
+              />
+
+              <FeatureCard
+                icon={ShieldCheck}
+                title="Radical Transparency"
+                description="We believe you deserve to know what you’re putting on your skin. No hidden formulas. No confusing claims."
+                points={transparencyPoints}
+                delay={0.15}
+              />
             </div>
           </div>
         </section>
 
         {/* Values */}
-        <section className="mb-32">
+        <section className="mb-24 md:mb-32">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            transition={{ duration: 0.6 }}
+            className="mb-14 text-center"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-blue-900">Our Values in Practice</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              More than just words on a page.
+            <SectionLabel>What We Stand For</SectionLabel>
+
+            <h2 className="mt-6 font-editorial text-5xl text-[#172b27] md:text-6xl">
+              Our Values in Practice
+            </h2>
+
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-[#879188]">
+              More than just words on a page. The principles behind everything
+              we do.
             </p>
           </motion.div>
 
@@ -342,24 +443,27 @@ export default function About() {
             whileInView="visible"
             viewport={{ once: true }}
             variants={containerVariants}
-            className="grid md:grid-cols-4 gap-8"
+            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
           >
-            {[
-              { icon: Award, title: "Quality First", desc: "Every formula is tested for safety, stability, and skin compatibility." },
-              { icon: Leaf, title: "Conscious & Responsible", desc: "We choose ingredients and packaging that reduce unnecessary harm." },
-              { icon: Users, title: "Inclusive by Design", desc: "Products created for different skin types, tones, and concerns." },
-              { icon: Heart, title: "Honest Communication", desc: "We don’t promise overnight miracles. We promise consistency and care." }
-            ].map((item, index) => (
+            {values.map((item, index) => (
               <motion.div
-                key={index}
+                key={item.title}
                 variants={itemVariants}
-                className="bg-card p-8 rounded-2xl border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
+                className="group rounded-2xl border border-[#e7eae3] bg-white/60 p-7 transition-all duration-300 hover:-translate-y-1 hover:border-[#718477]/50 hover:bg-white hover:shadow-[0_16px_40px_rgba(23,43,39,0.06)] md:p-8"
               >
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-6 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  <item.icon className="w-6 h-6" />
+                <div className="mb-8 flex h-12 w-12 items-center justify-center rounded-full bg-[#e9eee7] text-[#294b40] transition-all duration-300 group-hover:bg-[#172b27] group-hover:text-white">
+                  <item.icon className="h-5 w-5" strokeWidth={1.5} />
                 </div>
-                <h3 className="font-bold text-xl mb-3">{item.title}</h3>
-                <p className="text-muted-foreground leading-relaxed text-sm">
+
+                <span className="text-[10px] font-semibold tracking-[0.2em] text-[#a0aaa0]">
+                  0{index + 1}
+                </span>
+
+                <h3 className="mt-3 font-editorial text-2xl leading-tight text-[#172b27]">
+                  {item.title}
+                </h3>
+
+                <p className="mt-4 text-sm leading-7 text-[#879188]">
                   {item.desc}
                 </p>
               </motion.div>
@@ -367,76 +471,66 @@ export default function About() {
           </motion.div>
         </section>
 
-        {/* Stats
-        <motion.div 
-          initial="hidden"
-          whileInView="visible"
+        {/* Final CTA */}
+        <motion.section
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          variants={containerVariants}
-          className="grid md:grid-cols-3 gap-8 mb-32"
+          transition={{ duration: 0.7 }}
+          className="relative overflow-hidden rounded-2xl bg-[#172b27]"
         >
-          {[
-            { number: "50K+", label: "Customers trusting us" },
-            { number: "200+", label: "Thoughtfully formulated products" },
-            { number: "5+", label: "Years of learning & improving" }
-          ].map((stat, index) => (
-            <motion.div 
-              key={index}
-              variants={itemVariants}
-              className="text-center p-8 rounded-2xl bg-secondary/30 backdrop-blur-sm"
-            >
-              <p className="text-5xl font-bold text-primary mb-2">{stat.number}</p>
-              <p className="text-muted-foreground font-medium">{stat.label}</p>
-            </motion.div>
-          ))}
-        </motion.div> */}
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-[0.12] mix-blend-screen"
+            style={{
+              backgroundImage:
+                "url('https://images.unsplash.com/photo-1618331835717-801e976710b2?auto=format&fit=crop&q=80')",
+            }}
+          />
 
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="relative rounded-3xl overflow-hidden"
-        >
-          <div className="absolute inset-0 bg-primary" />
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1618331835717-801e976710b2?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-10 mix-blend-overlay" />
+          <div className="absolute -right-24 -top-32 h-96 w-96 rounded-full border border-white/10" />
+          <div className="absolute -right-12 -top-20 h-72 w-72 rounded-full border border-white/10" />
 
-          <div className="relative z-10 px-8 py-20 text-center text-primary-foreground max-w-3xl mx-auto">
-            <h2 className="text-4xl font-bold mb-6">Built by People Who Care About Skin</h2>
-            <p className="text-xl opacity-90 mb-10 leading-relaxed">
-              Belief Cosmetics is built by a team of formulators, technologists, and skincare enthusiasts who believe that better skin starts with better understanding.
+          <div className="relative z-10 mx-auto max-w-4xl px-6 py-20 text-center md:px-12 md:py-28">
+            <SectionLabel light>Made With Belief</SectionLabel>
+
+            <h2 className="mt-7 font-editorial text-5xl leading-[1.05] text-white md:text-7xl">
+              Built by People
+              <br />
+              <span className="italic text-[#c5d2c4]">Who Care About Skin.</span>
+            </h2>
+
+            <p className="mx-auto mt-7 max-w-2xl text-sm leading-8 text-white/70 md:text-base">
+              Belief Cosmetics is built by a team of formulators, technologists,
+              and skincare enthusiasts who believe that better skin starts
+              with better understanding.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/skin-analyzer" className="group relative w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 text-lg font-medium rounded-full text-white bg-blue-900 hover:bg-blue-800 shadow-md transition-all duration-300">
-                <span className="pointer-events-none mr-8">Start Your Skin Analysis</span>
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-white text-blue-900 rounded-full p-2 flex items-center justify-center">
-                  <ScanLine className="w-5 h-5 arrow-icon" />
+
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link
+                to="/skin-analyzer"
+                className="group inline-flex w-full items-center justify-between gap-6 rounded-full bg-[#f8f6f0] py-2 pl-7 pr-2 text-sm font-medium text-[#172b27] transition-all duration-300 hover:bg-white sm:w-auto"
+              >
+                <span>Start Your Skin Analysis</span>
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#e9eee7]">
+                  <ScanLine className="h-4 w-4 transition-transform duration-300 group-hover:rotate-12" />
                 </span>
               </Link>
-              <Link to="/products" className="group relative w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 text-lg font-medium rounded-full text-white bg-blue-900 hover:bg-blue-800 shadow-md transition-all duration-300">
-                <span className="pointer-events-none mr-8">Explore Products</span>
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-white text-blue-900 rounded-full p-2 flex items-center justify-center">
-                  <ArrowRight className="w-5 h-5 arrow-icon" />
+
+              <Link
+                to="/products"
+                className="group inline-flex w-full items-center justify-between gap-6 rounded-full border border-white/30 py-2 pl-7 pr-2 text-sm font-medium text-white transition-all duration-300 hover:border-white hover:bg-white/10 sm:w-auto"
+              >
+                <span>Explore Products</span>
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
               </Link>
             </div>
           </div>
-        </motion.div>
+        </motion.section>
       </main>
 
       <Footer />
-      <style>{`
-        @keyframes arrow-slide {
-          0% { transform: translateX(0); opacity: 1; }
-          45% { transform: translateX(100%); opacity: 0; }
-          50% { transform: translateX(-100%); opacity: 0; }
-          55% { transform: translateX(-100%); opacity: 0; }
-          100% { transform: translateX(0); opacity: 1; }
-        }
-        .group:hover .arrow-icon {
-          animation: arrow-slide 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-      `}</style>
     </div>
-  )
+  );
 }
