@@ -1,5 +1,15 @@
-import { Link } from "react-router-dom"
-import { LayoutDashboard, Package, ShoppingCart, Folder, Users, Mail, Store, Sparkles, Beaker, HelpCircle, BarChart2 } from "lucide-react"
+
+import { Link } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  Users,
+  Mail,
+  Store,
+  BarChart2,
+  ChevronRight,
+} from "lucide-react";
 
 const AdminSidebar = ({ currentSection, setCurrentSection }) => {
   const menuItems = [
@@ -8,91 +18,150 @@ const AdminSidebar = ({ currentSection, setCurrentSection }) => {
     { id: "orders", label: "Orders", icon: ShoppingCart },
     { id: "customers", label: "Customers", icon: Users },
     { id: "messages", label: "Messages", icon: Mail },
-  ]
+  ];
 
-  const analyzerItems = [
-    { id: "skin-analyzer", label: "Dashboard", icon: BarChart2 },
-    { id: "ingredients", label: "Ingredient Map", icon: Beaker },
-    { id: "questions", label: "Question Builder", icon: HelpCircle },
-  ]
+  const analyzerItem = {
+    id: "skin-analyzer",
+    label: "Skin Analyzer Insights",
+    icon: BarChart2,
+  };
+
+  const renderMenuItem = (item) => {
+    const Icon = item.icon;
+    const isActive = currentSection === item.id;
+
+    return (
+      <button
+        key={item.id}
+        type="button"
+        onClick={() => setCurrentSection(item.id)}
+        className={`
+          group flex w-full items-center gap-3
+          rounded-xl px-3.5 py-3
+          text-left font-sans text-[13px] font-medium
+          transition-all duration-300
+          ${isActive
+            ? "bg-[#172B27] text-[#F8F6F0] shadow-[0_5px_15px_rgba(23,43,39,0.12)]"
+            : "text-[#68766D] hover:bg-[#EDEFE8] hover:text-[#172B27]"
+          }
+        `}
+      >
+        <Icon
+          size={18}
+          strokeWidth={1.7}
+          className={`
+            shrink-0 transition-colors duration-300
+            ${isActive
+              ? "text-[#F8F6F0]"
+              : "text-[#849489] group-hover:text-[#294B40]"
+            }
+          `}
+        />
+
+        <span className="flex-1">{item.label}</span>
+
+        {isActive && (
+          <span className="h-1.5 w-1.5 rounded-full bg-[#B9C9B9]" />
+        )}
+
+        {!isActive && (
+          <ChevronRight
+            size={14}
+            className="opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:opacity-60"
+          />
+        )}
+      </button>
+    );
+  };
 
   return (
-    <aside className="w-64 border-r border-slate-800 flex flex-col h-full shadow-2xl sticky top-0 left-0 z-30 relative overflow-hidden">
-      {/* Background Image & Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img src="/Footer.png" alt="" className="w-full h-full object-cover opacity-50" />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 to-slate-900/90 backdrop-blur-[1px]" />
+    <aside className="
+      sticky left-0 top-0 z-30
+      flex h-screen w-64 shrink-0
+      flex-col overflow-hidden
+      border-r border-[#E7EAE3]
+      bg-[#F8F6F0]
+    ">
+
+      {/* Logo */}
+      <div className="flex h-24 shrink-0 items-center justify-center border-b border-[#E7EAE3] px-5">
+        <Link
+          to="/"
+          className="flex items-center justify-center"
+          aria-label="Belief Cosmetics homepage"
+        >
+          <img
+            src="/beliefCosmetics.png"
+            alt="Belief Cosmetics"
+            className="h-12 w-auto object-contain"
+          />
+        </Link>
       </div>
 
-      {/* Content Container */}
-      <div className="relative z-10 flex flex-col h-full bg-transparent">
-        {/* Logo */}
-        <div className="h-20 flex items-center justify-center border-b border-white/10">
-          <Link to="/" className="flex items-center gap-3 group">
-            {/* Logo Container */}
-            <div className="group-hover:scale-105 transition-transform duration-300">
-              <img src="/darkBeliefCosmetics.png" alt="Belief Cosmetics" className="h-10 w-auto object-contain" />
-            </div>
-          </Link>
-        </div>
+      {/* Navigation */}
+      <nav className="flex-1 space-y-8 overflow-y-auto px-4 py-7">
 
-        {/* Menu */}
-        <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-6">
-          <div>
-            <p className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Main Menu</p>
-            <div className="space-y-1">
-              {menuItems.map((item) => {
-                const Icon = item.icon
-                const isActive = currentSection === item.id
-
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setCurrentSection(item.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${isActive
-                        ? "bg-white/10 text-white shadow-lg backdrop-blur-sm border border-white/10"
-                        : "text-slate-400 hover:bg-white/5 hover:text-white"
-                      }`}
-                  >
-                    <Icon className={`w-[18px] h-[18px] transition-colors ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-white'}`} />
-                    <span>{item.label}</span>
-
-                    {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" />}
-                  </button>
-                )
-              })}
-            </div>
+        {/* Main Menu */}
+        <div>
+          <div className="mb-3 flex items-center justify-between px-3">
+            <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.2em] text-[#929B91]">
+              Main Menu
+            </p>
+            <span className="h-px w-8 bg-[#E0E4DC]" />
           </div>
 
-          <div>
-            <p className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Analytics</p>
-            <div className="space-y-1">
-              <button
-                onClick={() => setCurrentSection("skin-analyzer")}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${currentSection === "skin-analyzer"
-                    ? "bg-emerald-500/20 text-emerald-100 shadow-lg border border-emerald-500/30"
-                    : "text-slate-400 hover:bg-white/5 hover:text-white"
-                  }`}
-              >
-                <BarChart2 className={`w-[18px] h-[18px] transition-colors ${currentSection === "skin-analyzer" ? 'text-emerald-400' : 'text-slate-500 group-hover:text-white'}`} />
-                <span>Skin Analyzer Insights</span>
-
-                {currentSection === "skin-analyzer" && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />}
-              </button>
-            </div>
+          <div className="space-y-1">
+            {menuItems.map(renderMenuItem)}
           </div>
-        </nav>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-white/10 bg-black/20 backdrop-blur-sm">
-          <Link to="/" className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg font-medium transition-all text-sm border border-white/5 hover:border-white/20">
-            <Store className="w-4 h-4" />
-            <span>Back to Shop</span>
-          </Link>
         </div>
+
+        {/* Analytics */}
+        <div>
+          <div className="mb-3 flex items-center justify-between px-3">
+            <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.2em] text-[#929B91]">
+              Analytics
+            </p>
+            <span className="h-px w-8 bg-[#E0E4DC]" />
+          </div>
+
+          <div className="space-y-1">
+            {renderMenuItem(analyzerItem)}
+          </div>
+        </div>
+      </nav>
+
+      {/* Footer */}
+      <div className="shrink-0 border-t border-[#E7EAE3] bg-[#F4F2EA] p-4">
+        <Link
+          to="/"
+          className="
+            group flex w-full items-center justify-center
+            gap-2.5 rounded-full
+            border border-[#DDE2D9]
+            bg-transparent px-4 py-3
+            font-sans text-[11px] font-semibold
+            uppercase tracking-[0.1em]
+            text-[#294B40]
+            transition-all duration-300
+            hover:border-[#172B27]
+            hover:bg-[#172B27]
+            hover:text-[#F8F6F0]
+          "
+        >
+          <Store size={16} strokeWidth={1.7} />
+          <span>Back to Shop</span>
+          <ChevronRight
+            size={14}
+            className="transition-transform duration-300 group-hover:translate-x-1"
+          />
+        </Link>
+
+        <p className="mt-4 text-center font-sans text-[9px] tracking-[0.12em] text-[#A0A69F]">
+          BELIEF COSMETICS · ADMIN
+        </p>
       </div>
     </aside>
-  )
-}
+  );
+};
 
-export default AdminSidebar
+export default AdminSidebar;

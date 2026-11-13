@@ -1,526 +1,832 @@
-import { useMemo, useState } from "react"
-import { motion } from "framer-motion"
-import { 
-  TrendingUp, 
-  Package, 
-  ShoppingBag, 
-  Users, 
-  AlertCircle, 
-  ArrowUpRight, 
-  ArrowDownRight, 
+
+import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Package,
+  ShoppingBag,
+  Users,
+  AlertCircle,
   Activity,
   DollarSign,
   Eye,
   CreditCard,
-  Clock
-} from "lucide-react"
-import { 
-  LineChart, 
+  Clock,
+  TrendingUp,
+} from "lucide-react";
+import {
   AreaChart,
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
-  Area
-} from "recharts"
-import { format, subDays, isAfter, parseISO, isToday } from "date-fns"
+  Area,
+} from "recharts";
+import {
+  format,
+  subDays,
+  startOfDay,
+  parseISO,
+  isValid,
+  isToday,
+} from "date-fns";
 
-export default function DashboardOverview({ products = [], orders = [], customers = [], totalProductsCount }) {
-  const [dateRange, setDateRange] = useState("7d")
+// Visual colors only. These are not business data.
+const CHART_COLORS = [
+  "#294b40",
+  "#718477",
+  "#a8b5a5",
+  "#c5a77b",
+  "#9a8174",
+  "#667c91",
+  "#a18baf",
+];
 
-  // --- Calculations ---
+const getOrderDate = (order) => {
+  if (!order?.createdAt) return null;
+
+  const date =
+    typeof order.createdAt === "string"
+      ? parseISO(order.createdAt)
+      : new Date(order.createdAt);
+
+  return isValid(date) ? date : null;
+};
+
+const getProductId = (item) => {
+  const product = item?.product;
+
+  if (product && typeof product === "object") {
+    return String(product._id || product.id || "");
+  }
+
+  return String(product || item?._id || item?.productId || "");
+};
+
+const getAmount = (value) => {
+  const amount = Number(value);
+  return Number.isFinite(amount) ? amount : 0;
+};
+
+const getQuantity = (item) => {
+  const quantity = Number(item?.quantity);
+  return Number.isFinite(quantity) && quantity > 0 ? quantity : 0;
+};
+
+const getCurrencyFormatter = (currency) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 0,
+  });
+
+const formatCompactCurrency = (value, formatter) =>
+  formatter.format(value);
+
+export default function DashboardOverview({
+  products = [],
+  orders = [],
+  customers = [],
+  totalProductsCount,
+  lowStockThreshold,
+  currency = "INR",
+}) {
+  const [dateRange, setDateRange] = useState("7d");
+
+  const currencyFormatter = useMemo(
+    () => getCurrencyFormatter(currency),
+    [currency]
+  );
+
+  // All-time statistics from actual backend records.
   const stats = useMemo(() => {
-    const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0)
-    
-    // Fallback revenue from mock logic if needed
-    const displayRevenue = totalRevenue > 0 ? totalRevenue : products.reduce((sum, p) => sum + p.price * (50 - (p.stock || 0)), 0)
+    const totalRevenue = orders.reduce(
+      (sum, order) => sum + getAmount(order.totalAmount),
+      0
+    );
 
-    const totalOrders = orders.length
-    const totalCustomers = customers.length
-    const totalProducts = totalProductsCount ?? products.length
-    const aov = totalOrders > 0 ? displayRevenue / totalOrders : 0
+    const totalOrders = orders.length;
+    const totalCustomers = customers.length;
+
+    const totalProducts =
+      totalProductsCount ?? products.length;
+
+    const averageOrderValue =
+      totalOrders > 0 ? totalRevenue / totalOrders : null;
 
     return [
       {
         label: "Total Revenue",
-        value: `₹${displayRevenue.toLocaleString()}`,
-        change: "+12.5%",
-        isPositive: true,
+        value: currencyFormatter.format(totalRevenue),
         icon: DollarSign,
-        color: "text-emerald-500",
+        color: "text-[#294b40]",
       },
       {
         label: "Total Orders",
-        value: totalOrders.toString(),
-        change: "+8.2%",
-        isPositive: true,
+        value: totalOrders.toLocaleString("en-IN"),
         icon: ShoppingBag,
-        color: "text-blue-500",
+        color: "text-[#718477]",
       },
       {
         label: "Total Customers",
-        value: totalCustomers.toString(),
-        change: "+5.4%",
-        isPositive: true,
+        value: totalCustomers.toLocaleString("en-IN"),
         icon: Users,
-        color: "text-purple-500",
+        color: "text-[#879188]",
       },
       {
         label: "Total Products",
-        value: totalProducts.toString(),
-        change: "0%",
-        isPositive: true,
+        value: Number(totalProducts).toLocaleString("en-IN"),
         icon: Package,
-        color: "text-amber-500",
+        color: "text-[#a18b74]",
       },
       {
         label: "Avg. Order Value",
-        value: `₹${Math.round(aov).toLocaleString()}`,
-        change: "-2.1%",
-        isPositive: false,
+        value:
+          averageOrderValue === null
+            ? "—"
+            : currencyFormatter.format(averageOrderValue),
         icon: CreditCard,
-        color: "text-rose-500",
+        color: "text-[#667c91]",
       },
-    ]
-  }, [products, orders, customers])
+    ];
+  }, [
+    products,
+    orders,
+    customers,
+    totalProductsCount,
+    currencyFormatter,
+  ]);
 
-  // --- Real-Time Sales Chart Data ---
+  // Sales chart: actual orders only.
   const salesData = useMemo(() => {
-    const days = dateRange === "7d" ? 7 : 30
-    const cutoffDate = subDays(new Date(), days)
-    
-    const chartData = []
-    for (let i = days - 1; i >= 0; i--) {
-        const d = subDays(new Date(), i)
-        chartData.push({
-            date: format(d, "yyyy-MM-dd"),
-            name: dateRange === "7d" ? format(d, "EEE") : format(d, "dd/MM"),
-            revenue: 0
-        })
-    }
+    const days = Number(dateRange.replace("d", ""));
+    const today = startOfDay(new Date());
 
-    if (orders.length > 0) {
-        orders.forEach(order => {
-            if (!order.createdAt) return
-            const orderDate = parseISO(order.createdAt)
-            if (isAfter(orderDate, cutoffDate)) {
-                const dateKey = format(orderDate, "yyyy-MM-dd")
-                const dayEntry = chartData.find(d => d.date === dateKey)
-                if (dayEntry) {
-                    dayEntry.revenue += (order.totalAmount || 0)
-                }
-            }
-        })
-        return chartData
-    }
+    const chartData = Array.from({ length: days }, (_, index) => {
+      const date = subDays(today, days - 1 - index);
 
-    // Fallback Mock Data
-    return [
-      { name: "Mon", revenue: 4000 },
-      { name: "Tue", revenue: 3000 },
-      { name: "Wed", revenue: 2000 },
-      { name: "Thu", revenue: 2780 },
-      { name: "Fri", revenue: 1890 },
-      { name: "Sat", revenue: 2390 },
-      { name: "Sun", revenue: 3490 },
-    ]
-  }, [orders, dateRange])
+      return {
+        date: format(date, "yyyy-MM-dd"),
+        name:
+          days === 7
+            ? format(date, "EEE")
+            : format(date, "dd MMM"),
+        revenue: 0,
+        orders: 0,
+      };
+    });
 
-  // Skin Intelligence Data (Real-Time)
+    const dataByDate = new Map(
+      chartData.map((entry) => [entry.date, entry])
+    );
+
+    orders.forEach((order) => {
+      const orderDate = getOrderDate(order);
+      if (!orderDate) return;
+
+      const dateKey = format(orderDate, "yyyy-MM-dd");
+      const entry = dataByDate.get(dateKey);
+
+      if (!entry) return;
+
+      entry.revenue += getAmount(order.totalAmount);
+      entry.orders += 1;
+    });
+
+    return chartData;
+  }, [orders, dateRange]);
+
+  const hasSalesData = salesData.some(
+    (entry) => entry.orders > 0
+  );
+
+  // Discover every skin type present in actual customer profiles.
   const skinTypeData = useMemo(() => {
-    if (!customers || customers.length === 0) return []
+    const counts = new Map();
 
-    const counts = { Oily: 0, Dry: 0, Combination: 0, Sensitive: 0, Normal: 0 }
-    let hasData = false
+    customers.forEach((customer) => {
+      const skinType = customer?.skinProfile?.skinType;
 
-    customers.forEach(c => {
-        if (c.skinProfile && c.skinProfile.skinType) {
-            const type = c.skinProfile.skinType
-            if (counts[type] !== undefined) {
-                counts[type]++
-                hasData = true
-            }
-        }
-    })
+      if (
+        typeof skinType !== "string" ||
+        !skinType.trim()
+      ) {
+        return;
+      }
 
-    if (!hasData) {
-         // Fallback if no data yet (Single Gray Slice)
-         return [
-            { name: "No Data", value: 100, color: "#f1f5f9" }, // slate-100
-         ]
-    }
+      const normalizedType = skinType.trim();
 
-    return [
-        { name: "Oily", value: counts.Oily, color: "#10b981" },
-        { name: "Dry", value: counts.Dry, color: "#3b82f6" },
-        { name: "Combination", value: counts.Combination, color: "#8b5cf6" },
-        { name: "Sensitive", value: counts.Sensitive, color: "#f43f5e" },
-    ].filter(item => item.value > 0)
-  }, [customers])
+      counts.set(
+        normalizedType,
+        (counts.get(normalizedType) || 0) + 1
+      );
+    });
 
-  // Inventory Health
+    return Array.from(counts.entries())
+      .map(([name, value], index) => ({
+        name,
+        value,
+        color: CHART_COLORS[index % CHART_COLORS.length],
+      }))
+      .sort((a, b) => b.value - a.value);
+  }, [customers]);
+
+  // Inventory counts use the threshold supplied by the application.
   const separateStock = useMemo(() => {
-    const lowStock = products.filter(p => (p.stock || 0) < 10 && (p.stock || 0) > 0).length
-    const outOfStock = products.filter(p => (p.stock || 0) === 0).length
-    return { lowStock, outOfStock }
-  }, [products])
+    const outOfStock = products.filter(
+      (product) => getAmount(product.stock) <= 0
+    ).length;
 
-  // Top Products
+    const thresholdIsConfigured =
+      Number.isFinite(Number(lowStockThreshold)) &&
+      lowStockThreshold !== null &&
+      lowStockThreshold !== undefined &&
+      lowStockThreshold !== "";
+
+    const lowStock = thresholdIsConfigured
+      ? products.filter((product) => {
+        const stock = getAmount(product.stock);
+
+        return (
+          stock > 0 &&
+          stock <= Number(lowStockThreshold)
+        );
+      }).length
+      : null;
+
+    return {
+      outOfStock,
+      lowStock,
+      thresholdIsConfigured,
+    };
+  }, [products, lowStockThreshold]);
+
+  // Rank products by actual quantities sold.
   const topProducts = useMemo(() => {
-    if (orders.length > 0) {
-        const productSales = {}
-        orders.forEach(order => {
-            if (order.items && Array.isArray(order.items)) {
-                order.items.forEach(item => {
-                   const pid = item.product || item._id || item.name 
-                   
-                   // Find current product details to get real-time views
-                   const currentProduct = products.find(p => p._id === pid)
+    const salesByProduct = new Map();
 
-                   // Skip if product is deleted (not found in current products list)
-                   if (!currentProduct) return
+    orders.forEach((order) => {
+      if (!Array.isArray(order.items)) return;
 
-                   if (!productSales[pid]) {
-                       productSales[pid] = {
-                           name: currentProduct.name || item.name,
-                           sales: 0,
-                           revenue: 0,
-                           image: currentProduct.images?.[0] || item.image,
-                           price: currentProduct.price || item.price,
-                           category: currentProduct.category || item.category,
-                           views: currentProduct.views || 0 // Use real views
-                       }
-                   }
-                   productSales[pid].sales += (item.quantity || 1)
-                   productSales[pid].revenue += (item.price * (item.quantity || 1))
-                   // Ensure views are updated
-                   if(currentProduct.views) productSales[pid].views = currentProduct.views
-                })
-            }
-        })
-        return Object.values(productSales).sort((a, b) => b.sales - a.sales).slice(0, 5)
-    }
-    return [...products].sort((a, b) => b.price - a.price).slice(0, 3).map(p => ({
-        ...p,
-        sales: 0,
-        views: p.views || 0
-    }))
-  }, [products, orders])
+      order.items.forEach((item) => {
+        const productId = getProductId(item);
+        const quantity = getQuantity(item);
 
-  // Recent Activity
+        if (!productId || quantity <= 0) return;
+
+        const currentProduct = products.find(
+          (product) =>
+            String(product._id || product.id) === productId
+        );
+
+        const productObject =
+          item.product && typeof item.product === "object"
+            ? item.product
+            : {};
+
+        const name =
+          currentProduct?.name ||
+          productObject.name ||
+          item.name;
+
+        if (!name) return;
+
+        const existing = salesByProduct.get(productId) || {
+          id: productId,
+          name,
+          category:
+            currentProduct?.category ||
+            productObject.category ||
+            item.category ||
+            "",
+          image:
+            currentProduct?.images?.[0] ||
+            currentProduct?.image ||
+            productObject.images?.[0] ||
+            productObject.image ||
+            item.image ||
+            null,
+          price: getAmount(
+            item.price ??
+            currentProduct?.price ??
+            productObject.price
+          ),
+          sales: 0,
+          revenue: 0,
+          views:
+            currentProduct?.views ??
+            productObject.views ??
+            null,
+        };
+
+        existing.sales += quantity;
+        existing.revenue +=
+          getAmount(item.price ?? existing.price) * quantity;
+
+        salesByProduct.set(productId, existing);
+      });
+    });
+
+    return Array.from(salesByProduct.values())
+      .sort((a, b) => b.sales - a.sales);
+  }, [products, orders]);
+
+  // Recent activity from actual orders and customer registrations.
   const recentActivity = useMemo(() => {
-      const activities = []
-      orders.forEach(order => {
-          activities.push({
-              type: 'order',
-              title: `Order #${order._id ? order._id.slice(-4) : '---'}`,
-              desc: `₹${order.totalAmount}`,
-              time: order.createdAt,
-              color: "bg-emerald-500",
-              rawTime: new Date(order.createdAt) 
-          })
-      })
-      customers.forEach(user => {
-        activities.push({
-            type: 'user',
-            title: "New Customer",
-            desc: `${user.name}`,
-            time: user.createdAt,
-            color: "bg-blue-500",
-            rawTime: new Date(user.createdAt)
-        })
-      })
-      return activities
-        .sort((a, b) => b.rawTime - a.rawTime)
-        .slice(0, 5)
-        .map(act => ({
-            ...act,
-            time: isToday(act.rawTime) ? `Today, ${format(act.rawTime, "HH:mm")}` : format(act.rawTime, "MMM d, HH:mm") 
-        }))
-  }, [orders, customers])
+    const activities = [];
+
+    orders.forEach((order) => {
+      const date = getOrderDate(order);
+      if (!date) return;
+
+      activities.push({
+        id: `order-${order._id || date.getTime()}`,
+        type: "order",
+        title: `Order #${order._id ? String(order._id).slice(-6) : ""}`,
+        desc: currencyFormatter.format(
+          getAmount(order.totalAmount)
+        ),
+        rawTime: date,
+        color: "bg-[#294b40]",
+      });
+    });
+
+    customers.forEach((customer) => {
+      if (!customer.createdAt) return;
+
+      const date =
+        typeof customer.createdAt === "string"
+          ? parseISO(customer.createdAt)
+          : new Date(customer.createdAt);
+
+      if (!isValid(date)) return;
+
+      activities.push({
+        id: `customer-${customer._id || date.getTime()}`,
+        type: "customer",
+        title: "New Customer",
+        desc: customer.name || customer.email || "Customer",
+        rawTime: date,
+        color: "bg-[#718477]",
+      });
+    });
+
+    return activities
+      .sort((a, b) => b.rawTime - a.rawTime)
+      .slice(0, 5)
+      .map((activity) => ({
+        ...activity,
+        time: isToday(activity.rawTime)
+          ? `Today, ${format(activity.rawTime, "HH:mm")}`
+          : format(activity.rawTime, "dd MMM, HH:mm"),
+      }));
+  }, [orders, customers, currencyFormatter]);
+
+  const topSkinType = skinTypeData[0]?.name;
 
   return (
-    <div className="p-6 space-y-6 bg-muted/40 min-h-full">
-      
-      {/* 1. Compact Summary Cards - Smaller Height & Simple */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {stats.map((stat, idx) => (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.1 }}
-            key={idx}
-            className="bg-card px-4 py-3 rounded-xl shadow-sm border border-border flex items-center justify-between hover:shadow-md transition-shadow"
-          >
-            <div>
-              <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-wider">{stat.label}</p>
-              <div className="flex items-baseline gap-2 mt-0.5">
-                <h3 className="text-lg font-bold text-card-foreground">{stat.value}</h3>
-                 <span className={`text-[10px] font-medium ${stat.isPositive ? "text-green-500" : "text-red-500"}`}>
-                    {stat.change}
-                 </span>
+    <div className="min-h-full space-y-6 bg-[#f8f6f0] p-5 md:p-6">
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        {stats.map((stat, index) => {
+          const Icon = stat.icon;
+
+          return (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.07 }}
+              className="flex items-center justify-between rounded-2xl border border-[#e7eae3] bg-white px-5 py-5 shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-[#879188]">
+                  {stat.label}
+                </p>
+
+                <h3 className="mt-2 break-words text-xl font-semibold text-[#172b27]">
+                  {stat.value}
+                </h3>
               </div>
-            </div>
-            <div className={`p-1.5 rounded-full bg-muted/50 ${stat.color}`}>
-               <stat.icon size={16} />
-            </div>
-          </motion.div>
-        ))}
+
+              <div className={`ml-3 rounded-full bg-[#f3f5f0] p-3 ${stat.color}`}>
+                <Icon size={19} />
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* 2. Sales Overview Chart */}
-        {/* 2. Sales Overview Chart */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+      {/* Sales and Insights */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+
+        {/* Sales Overview */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl border border-[#e7eae3] bg-white p-5 shadow-sm md:p-6 xl:col-span-2"
         >
-          <div className="flex justify-between items-center mb-8">
+          <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Sales Overview</h3>
-              <p className="text-slate-400 text-sm mt-1">Revenue performance over time</p>
+              <h3 className="font-editorial text-2xl text-[#172b27]">
+                Sales Overview
+              </h3>
+              <p className="mt-1 text-sm text-[#879188]">
+                Revenue from recorded orders
+              </p>
             </div>
-            <div className="relative">
-                <select 
-                  value={dateRange} 
-                  onChange={(e) => setDateRange(e.target.value)}
-                  className="appearance-none bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg py-2 pl-4 pr-10 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none cursor-pointer font-medium"
-                >
-                  <option value="7d">Last 7 Days</option>
-                  <option value="30d">Last 30 Days</option>
-                </select>
-                 <ArrowDownRight className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-            </div>
+
+            <select
+              value={dateRange}
+              onChange={(event) => setDateRange(event.target.value)}
+              className="rounded-lg border border-[#e7eae3] bg-[#f8f6f0] px-4 py-2 text-sm text-[#294b40] outline-none focus:border-[#718477]"
+            >
+              <option value="7d">Last 7 Days</option>
+              <option value="30d">Last 30 Days</option>
+            </select>
           </div>
+
           <div className="h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={salesData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <defs>
-                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.5} />
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                   </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 500 }} 
-                  dy={10}
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  width={80}
-                  tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 500 }} 
-                  tickFormatter={(value) => `₹${value}`}
-                />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  itemStyle={{ color: '#1e293b', fontWeight: 600 }}
-                  labelStyle={{ color: '#64748b', marginBottom: '0.5rem', fontSize: '12px' }}
-                  cursor={{ stroke: '#6366f1', strokeWidth: 1, strokeDasharray: '4 4' }}
-                  formatter={(value) => [`₹${value}`, "Revenue"]}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  stroke="#6366f1" 
-                  strokeWidth={3}
-                  fill="url(#colorRevenue)" 
-                  fillOpacity={1}
-                  dot={{ r: 4, fill: "#fff", strokeWidth: 2, stroke: "#6366f1" }} 
-                  activeDot={{ r: 6, fill: "#6366f1", stroke: "#fff", strokeWidth: 2 }} 
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            {hasSalesData ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={salesData}
+                  margin={{ top: 10, right: 12, left: 4, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient
+                      id="beliefRevenueGradient"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="#718477"
+                        stopOpacity={0.35}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="#718477"
+                        stopOpacity={0}
+                      />
+                    </linearGradient>
+                  </defs>
+
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#e7eae3"
+                  />
+
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#879188", fontSize: 11 }}
+                    dy={10}
+                  />
+
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    width={75}
+                    tick={{ fill: "#879188", fontSize: 11 }}
+                    tickFormatter={(value) =>
+                      new Intl.NumberFormat("en-IN", {
+                        notation: "compact",
+                        maximumFractionDigits: 1,
+                      }).format(value)
+                    }
+                  />
+
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#ffffff",
+                      borderRadius: "12px",
+                      border: "1px solid #e7eae3",
+                    }}
+                    formatter={(value, name) => [
+                      name === "revenue"
+                        ? currencyFormatter.format(value)
+                        : value,
+                      name === "revenue" ? "Revenue" : "Orders",
+                    ]}
+                    labelStyle={{ color: "#294b40" }}
+                  />
+
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#294b40"
+                    strokeWidth={2.5}
+                    fill="url(#beliefRevenueGradient)"
+                    dot={false}
+                    activeDot={{
+                      r: 5,
+                      fill: "#294b40",
+                      stroke: "#ffffff",
+                      strokeWidth: 2,
+                    }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center rounded-xl border border-dashed border-[#dfe4dc] bg-[#f8f6f0]/60 text-center">
+                <TrendingUp size={26} className="mb-3 text-[#a8b5a5]" />
+                <p className="text-sm font-medium text-[#294b40]">
+                  No sales data for this period
+                </p>
+                <p className="mt-1 text-xs text-[#879188]">
+                  Recorded orders will appear here.
+                </p>
+              </div>
+            )}
           </div>
         </motion.div>
 
-        {/* 3. & 5. Right Column Widgets */}
+        {/* Right Column */}
         <div className="space-y-6">
-          
+
           {/* Inventory Health */}
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
+          <motion.div
+            initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-card p-5 rounded-xl shadow-sm border border-border"
+            className="rounded-2xl border border-[#e7eae3] bg-white p-5 shadow-sm"
           >
-            <h3 className="text-base font-bold text-card-foreground mb-4">Inventory Health</h3>
-            <div className="space-y-3">
-              {separateStock.outOfStock > 0 && (
-                <div className="flex items-center justify-between p-2.5 bg-red-500/10 rounded-lg border border-red-500/20">
-                    <div className="flex items-center gap-2">
-                    <div className="text-red-500"><AlertCircle size={16} /></div>
-                    <span className="text-sm font-medium text-red-700 dark:text-red-400">Out of Stock</span>
-                    </div>
-                    <span className="text-base font-bold text-red-700 dark:text-red-400">{separateStock.outOfStock}</span>
+            <h3 className="font-editorial text-2xl text-[#172b27]">
+              Inventory Health
+            </h3>
+
+            <div className="mt-5 space-y-3">
+              <div className="flex items-center justify-between rounded-xl border border-red-100 bg-red-50 p-3">
+                <div className="flex items-center gap-2">
+                  <AlertCircle size={17} className="text-red-500" />
+                  <span className="text-sm font-medium text-red-800">
+                    Out of Stock
+                  </span>
                 </div>
-              )}
-              {separateStock.lowStock > 0 && (
-                <div className="flex items-center justify-between p-2.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
-                    <div className="flex items-center gap-2">
-                    <div className="text-amber-500"><Activity size={16} /></div>
-                    <span className="text-sm font-medium text-amber-700 dark:text-amber-400">Low Stock</span>
-                    </div>
-                    <span className="text-base font-bold text-amber-700 dark:text-amber-400">{separateStock.lowStock}</span>
-                </div>
-              )}
-              {separateStock.outOfStock === 0 && separateStock.lowStock === 0 && (
-                  <div className="p-4 text-center text-muted-foreground bg-muted/30 rounded-lg border border-dashed border-border">
-                      <p className="text-sm">Inventory is healthy</p>
+
+                <span className="font-semibold text-red-800">
+                  {separateStock.outOfStock}
+                </span>
+              </div>
+
+              {separateStock.thresholdIsConfigured ? (
+                <div className="flex items-center justify-between rounded-xl border border-amber-100 bg-amber-50 p-3">
+                  <div className="flex items-center gap-2">
+                    <Activity size={17} className="text-amber-600" />
+                    <span className="text-sm font-medium text-amber-800">
+                      Low Stock
+                    </span>
                   </div>
+
+                  <span className="font-semibold text-amber-800">
+                    {separateStock.lowStock}
+                  </span>
+                </div>
+              ) : (
+                <p className="rounded-xl border border-dashed border-[#dfe4dc] p-3 text-xs text-[#879188]">
+                  Low-stock threshold is not configured.
+                </p>
               )}
             </div>
           </motion.div>
 
-          {/* Skin Intelligence Snippet */}
-          <motion.div 
-             initial={{ opacity: 0, x: 20 }}
-             animate={{ opacity: 1, x: 0 }}
-             transition={{ delay: 0.4 }}
-             className="bg-card p-5 rounded-xl shadow-sm border border-border"
+          {/* Skin Intelligence */}
+          <motion.div
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="rounded-2xl border border-[#e7eae3] bg-white p-5 shadow-sm"
           >
-            <h3 className="text-base font-bold text-card-foreground mb-4">Skin Intelligence</h3>
-            <div className="h-40 relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={skinTypeData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={70}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {skinTypeData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-xs text-muted-foreground">Top Type</span>
-                <span className="text-lg font-bold text-card-foreground">
-                    {(skinTypeData.length === 0 || (skinTypeData.length === 1 && skinTypeData[0].name === "No Data")) 
-                        ? "---" 
-                        : skinTypeData.reduce((prev, current) => (prev.value > current.value) ? prev : current).name}
-                </span>
-              </div>
-            </div>
-            <div className="flex justify-center gap-3 mt-2">
-              {(skinTypeData.length === 0 || (skinTypeData.length === 1 && skinTypeData[0].name === "No Data")) ? (
-                  <span className="text-xs text-muted-foreground mt-2">No analysis data yet</span>
-              ) : (
-                  skinTypeData.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.color }} />
-                      <span className="text-[10px] text-muted-foreground">{item.name}</span>
+            <h3 className="font-editorial text-2xl text-[#172b27]">
+              Skin Intelligence
+            </h3>
+
+            {skinTypeData.length > 0 ? (
+              <>
+                <div className="relative mt-4 h-44">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={skinTypeData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={48}
+                        outerRadius={69}
+                        paddingAngle={3}
+                      >
+                        {skinTypeData.map((entry) => (
+                          <Cell
+                            key={entry.name}
+                            fill={entry.color}
+                          />
+                        ))}
+                      </Pie>
+
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+
+                  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-[10px] uppercase tracking-wider text-[#879188]">
+                      Most Common
+                    </span>
+                    <span className="mt-1 max-w-[110px] truncate text-center text-sm font-semibold text-[#294b40]">
+                      {topSkinType}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+                  {skinTypeData.map((item) => (
+                    <div
+                      key={item.name}
+                      className="flex items-center gap-1.5"
+                    >
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      />
+
+                      <span className="text-xs text-[#718477]">
+                        {item.name} ({item.value})
+                      </span>
                     </div>
-                  ))
-              )}
-            </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="flex h-44 flex-col items-center justify-center text-center">
+                <p className="text-sm text-[#718477]">
+                  No skin analysis data available.
+                </p>
+                <p className="mt-1 text-xs text-[#a0a99f]">
+                  Customer skin profiles will appear here.
+                </p>
+              </div>
+            )}
           </motion.div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* 4. Product Performance */}
-        <motion.div 
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.5 }}
-           className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100"
+      {/* Product Performance and Recent Activity */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+
+        {/* Top Performing Products */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl border border-[#e7eae3] bg-white p-5 shadow-sm md:p-6 xl:col-span-2"
         >
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-slate-800">Top Performing Products</h3>
-            <button className="text-indigo-600 text-sm font-medium hover:text-indigo-700 transition-colors">View All</button>
+          <div className="mb-6">
+            <h3 className="font-editorial text-2xl text-[#172b27]">
+              Top Performing Products
+            </h3>
+            <p className="mt-1 text-sm text-[#879188]">
+              Ranked by actual units sold
+            </p>
           </div>
+
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="text-xs text-slate-400 uppercase tracking-wider text-left border-b border-slate-100">
+            <table className="w-full min-w-[560px]">
+              <thead className="border-b border-[#e7eae3] text-left text-[10px] uppercase tracking-wider text-[#879188]">
                 <tr>
-                  <th className="pb-3 pl-2 font-medium">Product</th>
-                  <th className="pb-3 text-right font-medium">Price</th>
-                  <th className="pb-3 text-right font-medium">Sales</th>
-                  <th className="pb-3 text-right font-medium">Views</th>
+                  <th className="pb-3 pl-2 font-semibold">Product</th>
+                  <th className="pb-3 text-right font-semibold">Price</th>
+                  <th className="pb-3 text-right font-semibold">Units Sold</th>
+                  <th className="pb-3 text-right font-semibold">Views</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
-                {topProducts.map((product, idx) => (
-                  <tr key={idx} className="group hover:bg-slate-50/50 transition-colors">
+
+              <tbody className="divide-y divide-[#f0f1ed]">
+                {topProducts.map((product) => (
+                  <tr
+                    key={product.id}
+                    className="transition-colors hover:bg-[#f8f6f0]/70"
+                  >
                     <td className="py-4 pl-2">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden shadow-sm border border-slate-100">
-                          {product.images && product.images[0] ? (
-                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
-                          ) : product.image ? (
-                             <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[#e7eae3] bg-[#f8f6f0]">
+                          {product.image ? (
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="h-full w-full object-cover"
+                            />
                           ) : (
-                            <Package size={20} className="text-slate-400" />
+                            <Package
+                              size={19}
+                              className="text-[#a8b5a5]"
+                            />
                           )}
                         </div>
-                        <div>
-                          <p className="font-semibold text-slate-800 text-sm truncate max-w-[180px]">{product.name}</p>
-                          <p className="text-xs text-slate-500 mt-0.5">{product.category || 'Beauty'}</p>
+
+                        <div className="min-w-0">
+                          <p className="max-w-[180px] truncate text-sm font-semibold text-[#294b40]">
+                            {product.name}
+                          </p>
+
+                          {product.category && (
+                            <p className="mt-0.5 text-xs text-[#879188]">
+                              {product.category}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </td>
-                    <td className="py-4 text-right text-sm font-semibold text-slate-700">₹{product.price}</td>
-                    <td className="py-4 text-right text-sm text-slate-600 font-medium">{product.sales !== undefined ? product.sales : '0'}</td>
-                    <td className="py-4 text-right">
-                       <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-full font-medium">
-                         <Eye size={12} /> {product.views || 0}
-                       </span>
+
+                    <td className="py-4 text-right text-sm text-[#294b40]">
+                      {currencyFormatter.format(product.price)}
+                    </td>
+
+                    <td className="py-4 text-right text-sm font-semibold text-[#294b40]">
+                      {product.sales.toLocaleString("en-IN")}
+                    </td>
+
+                    <td className="py-4 text-right text-sm text-[#718477]">
+                      {product.views === null
+                        ? "—"
+                        : Number(product.views).toLocaleString("en-IN")}
                     </td>
                   </tr>
                 ))}
+
+                {topProducts.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="py-12 text-center text-sm text-[#879188]"
+                    >
+                      No product sales have been recorded yet.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
         </motion.div>
 
-        {/* 6. & 7. Alerts & Logs */}
-        <motion.div 
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.6 }}
-           className="bg-card p-6 rounded-xl shadow-sm border border-border"
+        {/* Recent Activity */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl border border-[#e7eae3] bg-white p-5 shadow-sm md:p-6"
         >
-          <h3 className="text-lg font-bold text-card-foreground mb-6">Recent Alerts</h3>
-          <div className="space-y-0 relative">
-             <div className="absolute left-2.5 top-0 bottom-0 w-0.5 bg-muted"></div>
-             {recentActivity.length > 0 ? recentActivity.map((alert, idx) => (
-                <div key={idx} className="relative pl-8 pb-6 last:pb-0 group">
-                   <div className={`absolute left-0 w-5 h-5 rounded-full border-4 border-card ${alert.color} shadow-sm z-10`} />
-                   <div>
-                      <p className="text-sm font-medium text-card-foreground group-hover:text-primary transition-colors">{alert.title}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{alert.desc}</p>
-                      <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
-                        <Clock size={10} />
-                        {alert.time}
-                      </div>
-                   </div>
+          <h3 className="font-editorial text-2xl text-[#172b27]">
+            Recent Activity
+          </h3>
+
+          <p className="mt-1 text-sm text-[#879188]">
+            Latest recorded events
+          </p>
+
+          <div className="relative mt-6 space-y-5">
+            {recentActivity.length > 0 && (
+              <div className="absolute bottom-2 left-[9px] top-2 w-px bg-[#e7eae3]" />
+            )}
+
+            {recentActivity.length > 0 ? (
+              recentActivity.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="relative flex gap-3"
+                >
+                  <span
+                    className={`relative z-10 mt-1 h-[19px] w-[19px] shrink-0 rounded-full border-4 border-white ${activity.color}`}
+                  />
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-[#294b40]">
+                      {activity.title}
+                    </p>
+
+                    <p className="mt-0.5 truncate text-xs text-[#718477]">
+                      {activity.desc}
+                    </p>
+
+                    <div className="mt-2 flex items-center gap-1.5 text-[10px] text-[#a0a99f]">
+                      <Clock size={11} />
+                      {activity.time}
+                    </div>
+                  </div>
                 </div>
-             )) : (
-                 <p className="text-sm text-muted-foreground pl-4">No recent activity</p>
-             )}
+              ))
+            ) : (
+              <p className="py-10 text-center text-sm text-[#879188]">
+                No recent activity available.
+              </p>
+            )}
           </div>
         </motion.div>
       </div>
     </div>
-  )
+  );
 }
