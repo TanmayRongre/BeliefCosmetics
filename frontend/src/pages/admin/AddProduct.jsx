@@ -1,12 +1,35 @@
+
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Plus, Trash, Upload, X, Loader } from "lucide-react";
+import {
+  Plus,
+  Trash,
+  Upload,
+  X,
+  Loader,
+  Package,
+  Image as ImageIcon,
+  ShieldCheck,
+  FlaskConical,
+  Layers,
+  ArrowLeft,
+} from "lucide-react";
 import axiosInstance from "../../lib/axios";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 
-const categories = ["Cleanser", "Moisturizer", "Serum", "Sunscreen", "Mask", "Toner", "Treatment"];
+const categories = [
+  "Face Wash",
+  "Moisturizer",
+  "Serum",
+  "Sunscreen",
+  "Mask",
+  "Toner",
+  "Treatment",
+];
+
 const skinTypes = ["Oily", "Dry", "Combination", "Sensitive", "Normal"];
+
 const skinConcerns = [
   "Acne",
   "Breakouts",
@@ -26,8 +49,9 @@ const skinConcerns = [
   "Rosacea",
   "Sensitivity",
   "Dark circles",
-  "Puffiness"
+  "Puffiness",
 ];
+
 const allergyLabels = [
   "Paraben-free",
   "Alcohol-free",
@@ -36,9 +60,19 @@ const allergyLabels = [
   "Silicone-free",
 ];
 
+const inputClass =
+  "mt-2 w-full rounded-xl border border-[#e7eae3] bg-[#fbfaf6] px-4 py-3 text-sm text-[#172b27] outline-none transition-all placeholder:text-[#a0aaa2] focus:border-[#718477] focus:ring-2 focus:ring-[#718477]/10";
+
+const labelClass =
+  "block text-xs font-semibold uppercase tracking-[0.12em] text-[#526b5d]";
+
 const AddProduct = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = !!id;
+
   const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -58,10 +92,12 @@ const AddProduct = () => {
     variants: [],
   });
 
-  const [newVariant, setNewVariant] = useState({ name: "", stock: "", price: "", image: "" });
-
-  const { id } = useParams();
-  const isEditMode = !!id;
+  const [newVariant, setNewVariant] = useState({
+    name: "",
+    stock: "",
+    price: "",
+    image: "",
+  });
 
   useEffect(() => {
     if (isEditMode) {
@@ -72,8 +108,10 @@ const AddProduct = () => {
   const fetchProduct = async () => {
     try {
       setLoading(true);
+
       const res = await axiosInstance.get(`/products/${id}`);
       const product = res.data;
+
       setFormData({
         name: product.name,
         description: product.description,
@@ -83,9 +121,15 @@ const AddProduct = () => {
         stock: product.stock,
         status: product.status || "Active",
         featured: product.featured || false,
-        ingredients: Array.isArray(product.ingredients) ? product.ingredients.join(", ") : product.ingredients,
-        activeIngredients: Array.isArray(product.activeIngredients) ? product.activeIngredients.join(", ") : "",
-        warnings: Array.isArray(product.warnings) ? product.warnings.join(", ") : "",
+        ingredients: Array.isArray(product.ingredients)
+          ? product.ingredients.join(", ")
+          : product.ingredients || "",
+        activeIngredients: Array.isArray(product.activeIngredients)
+          ? product.activeIngredients.join(", ")
+          : "",
+        warnings: Array.isArray(product.warnings)
+          ? product.warnings.join(", ")
+          : "",
         skinType: product.skinType || [],
         skinConcerns: product.skinConcerns || [],
         allergyLabels: product.allergyLabels || [],
@@ -102,82 +146,119 @@ const AddProduct = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
+
+    setFormData((prev) => ({
+      ...prev,
       [name]: type === "checkbox" ? checked : value,
-    });
+    }));
   };
 
   const handleArrayChange = (e, field) => {
     const { value, checked } = e.target;
-    let updatedArray = [...formData[field]];
-    if (checked) {
-      updatedArray.push(value);
-    } else {
-      updatedArray = updatedArray.filter((item) => item !== value);
-    }
-    setFormData({ ...formData, [field]: updatedArray });
+
+    setFormData((prev) => ({
+      ...prev,
+      [field]: checked
+        ? [...prev[field], value]
+        : prev[field].filter((item) => item !== value),
+    }));
   };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
+
     if (file) {
       const reader = new FileReader();
+
       reader.onloadend = () => {
-        setFormData({ ...formData, images: [...formData.images, reader.result] });
+        setFormData((prev) => ({
+          ...prev,
+          images: [...prev.images, reader.result],
+        }));
       };
+
       reader.readAsDataURL(file);
+      e.target.value = "";
     }
   };
 
   const removeImage = (index) => {
-    const updatedImages = formData.images.filter((_, i) => i !== index);
-    setFormData({ ...formData, images: updatedImages });
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
   };
 
   const handleVariantChange = (e) => {
     const { name, value } = e.target;
-    setNewVariant({ ...newVariant, [name]: value });
+
+    setNewVariant((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleVariantImageUpload = (e) => {
     const file = e.target.files[0];
+
     if (file) {
       const reader = new FileReader();
+
       reader.onloadend = () => {
-        setNewVariant({ ...newVariant, image: reader.result });
+        setNewVariant((prev) => ({
+          ...prev,
+          image: reader.result,
+        }));
       };
+
       reader.readAsDataURL(file);
+      e.target.value = "";
     }
   };
 
   const addVariant = () => {
     if (newVariant.name && newVariant.stock) {
-      setFormData({
-        ...formData,
-        variants: [...formData.variants, newVariant],
+      setFormData((prev) => ({
+        ...prev,
+        variants: [...prev.variants, newVariant],
+      }));
+
+      setNewVariant({
+        name: "",
+        stock: "",
+        price: "",
+        image: "",
       });
-      setNewVariant({ name: "", stock: "", image: "" });
     } else {
       toast.error("Please fill in variant name and stock");
     }
   };
 
   const removeVariant = (index) => {
-    const updatedVariants = formData.variants.filter((_, i) => i !== index);
-    setFormData({ ...formData, variants: updatedVariants });
+    setFormData((prev) => ({
+      ...prev,
+      variants: prev.variants.filter((_, i) => i !== index),
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      // Process ingredients from comma-separated string to array
       const processedData = {
         ...formData,
-        ingredients: formData.ingredients.split(",").map((item) => item.trim()),
-        activeIngredients: formData.activeIngredients.split(",").map((item) => item.trim()).filter(Boolean),
-        warnings: formData.warnings.split(",").map((item) => item.trim()).filter(Boolean),
+        ingredients: formData.ingredients
+          .split(",")
+          .map((item) => item.trim()),
+        activeIngredients: formData.activeIngredients
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean),
+        warnings: formData.warnings
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean),
       };
 
       if (isEditMode) {
@@ -187,62 +268,137 @@ const AddProduct = () => {
         await axiosInstance.post("/products", processedData);
         toast.success("Product created successfully");
       }
+
       navigate("/admin");
     } catch (error) {
       console.error("Error saving product:", error);
-      toast.error(error.response?.data?.message || "Failed to save product");
+      toast.error(error.response?.data?.error || error.response?.data?.message || "Failed to save product");
     } finally {
       setLoading(false);
     }
   };
 
+  const SectionHeading = ({ icon: Icon, title, description }) => (
+    <div className="mb-6 flex items-start gap-3 border-b border-[#e7eae3] pb-5">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#edf0e7]">
+        <Icon className="h-[18px] w-[18px] text-[#526b5d]" />
+      </div>
+
+      <div>
+        <h3 className="font-editorial text-2xl font-semibold text-[#172b27]">
+          {title}
+        </h3>
+        <p className="mt-1 text-xs text-[#879188]">{description}</p>
+      </div>
+    </div>
+  );
+
+  const CheckboxPill = ({ value, checked, onChange }) => (
+    <label
+      className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-2 text-xs transition-all ${checked
+          ? "border-[#718477] bg-[#edf0e7] text-[#294b40]"
+          : "border-[#e7eae3] bg-white text-[#718477] hover:border-[#aab9aa]"
+        }`}
+    >
+      <input
+        type="checkbox"
+        value={value}
+        checked={checked}
+        onChange={onChange}
+        className="h-3.5 w-3.5 accent-[#294b40]"
+      />
+      {value}
+    </label>
+  );
+
+  if (loading && isEditMode && !formData.name) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center bg-[#f8f6f0]">
+        <div className="text-center">
+          <Loader className="mx-auto h-7 w-7 animate-spin text-[#718477]" />
+          <p className="mt-3 text-xs text-[#879188]">Loading product details...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[#f8f6f0] px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
+      <div className="mx-auto max-w-5xl">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl shadow-lg overflow-hidden"
+          transition={{ duration: 0.4 }}
         >
-          <div className="px-6 py-4 bg-emerald-600 border-b border-emerald-500">
-            <h2 className="text-2xl font-bold text-white">{isEditMode ? "Edit Product" : "Add New Product"}</h2>
-            <p className="text-emerald-100 mt-1">{isEditMode ? "Update product details" : "Create a new product with skin analysis details"}</p>
+          {/* Page heading */}
+          <div className="mb-8">
+            <button
+              type="button"
+              onClick={() => navigate("/admin")}
+              className="mb-6 inline-flex items-center gap-2 text-xs font-medium text-[#718477] transition-colors hover:text-[#172b27]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </button>
+
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.25em] text-[#879188]">
+              Belief Cosmetics / Product Management
+            </p>
+
+            <h1 className="font-editorial text-4xl font-semibold leading-none text-[#172b27] sm:text-5xl">
+              {isEditMode ? "Edit Product" : "Add New Product"}
+            </h1>
+
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#879188]">
+              {isEditMode
+                ? "Update the product information, ingredients and skin compatibility details."
+                : "Add a new product to your collection with its details, ingredients and skin compatibility information."}
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
-            <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">Basic Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">Product Name</label>
+            <section className="rounded-2xl border border-[#e7eae3] bg-white p-5 shadow-sm shadow-[#172b27]/[0.02] sm:p-8">
+              <SectionHeading
+                icon={Package}
+                title="Basic Information"
+                description="The essential details of your product."
+              />
+
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div className="md:col-span-2">
+                  <label className={labelClass}>Product Name</label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
+                    placeholder="Enter product name"
+                    className={inputClass}
                     required
                   />
                 </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">Description</label>
+
+                <div className="md:col-span-2">
+                  <label className={labelClass}>Description</label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={4}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
+                    placeholder="Describe your product..."
+                    className={`${inputClass} resize-y`}
                     required
                   />
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Category</label>
+                  <label className={labelClass}>Category</label>
                   <select
                     name="category"
                     value={formData.category}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
+                    className={inputClass}
                     required
                   >
                     <option value="">Select Category</option>
@@ -253,180 +409,249 @@ const AddProduct = () => {
                     ))}
                   </select>
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Stock</label>
+                  <label className={labelClass}>Stock Quantity</label>
                   <input
                     type="number"
                     name="stock"
                     value={formData.stock}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
+                    placeholder="Enter available stock"
+                    className={inputClass}
                     required
                   />
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Price (₹)</label>
+                  <label className={labelClass}>Price (₹)</label>
                   <input
                     type="number"
                     name="price"
                     value={formData.price}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
+                    placeholder="0.00"
+                    className={inputClass}
                     required
                   />
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Discount Price (₹)</label>
+                  <label className={labelClass}>Discount Price (₹)</label>
                   <input
                     type="number"
                     name="discountPrice"
                     value={formData.discountPrice}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
+                    placeholder="Optional"
+                    className={inputClass}
                   />
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center">
+
+                <div className="md:col-span-2">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#e7eae3] bg-[#fbfaf6] p-4 transition-colors hover:border-[#aab9aa]">
                     <input
                       type="checkbox"
                       name="featured"
                       checked={formData.featured}
                       onChange={handleInputChange}
-                      className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                      className="h-4 w-4 accent-[#294b40]"
                     />
-                    <label className="ml-2 block text-sm text-gray-900">Featured Product</label>
-                  </div>
+
+                    <div>
+                      <p className="text-sm font-semibold text-[#294b40]">
+                        Featured Product
+                      </p>
+                      <p className="mt-0.5 text-xs text-[#879188]">
+                        Mark this product as featured.
+                      </p>
+                    </div>
+                  </label>
                 </div>
               </div>
             </section>
 
             {/* Product Images */}
-            <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">Product Images</h3>
-              <div className="flex items-center space-x-4 mb-4">
-                <label className="cursor-pointer bg-emerald-50 text-emerald-700 px-4 py-2 rounded-md hover:bg-emerald-100 transition-colors flex items-center">
-                  <Upload className="w-5 h-5 mr-2" />
-                  Upload Image
-                  <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
-                </label>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {formData.images.map((img, index) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={img}
-                      alt={`Product ${index + 1}`}
-                      className="h-32 w-full object-cover rounded-md border"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            <section className="rounded-2xl border border-[#e7eae3] bg-white p-5 shadow-sm shadow-[#172b27]/[0.02] sm:p-8">
+              <SectionHeading
+                icon={ImageIcon}
+                title="Product Images"
+                description="Upload and manage the images associated with this product."
+              />
+
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#dfe4dc] bg-[#edf0e7] px-5 py-3 text-xs font-semibold text-[#294b40] transition-all hover:border-[#718477] hover:bg-[#e3e9df]">
+                <Upload className="h-4 w-4" />
+                Upload Image
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                />
+              </label>
+
+              {formData.images.length > 0 ? (
+                <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                  {formData.images.map((img, index) => (
+                    <div
+                      key={index}
+                      className="group relative overflow-hidden rounded-xl border border-[#e7eae3] bg-[#fbfaf6]"
                     >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+                      <div className="flex h-36 items-center justify-center p-3">
+                        <img
+                          src={img}
+                          alt={`Product ${index + 1}`}
+                          className="h-full w-full object-contain"
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        aria-label={`Remove image ${index + 1}`}
+                        className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#172b27] text-white opacity-100 transition-colors hover:bg-[#a35e55] sm:opacity-0 sm:group-hover:opacity-100"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+
+                      <div className="border-t border-[#e7eae3] px-3 py-2 text-center text-[10px] text-[#879188]">
+                        Image {index + 1}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-5 flex min-h-36 flex-col items-center justify-center rounded-xl border border-dashed border-[#dfe4dc] bg-[#fbfaf6] text-center">
+                  <ImageIcon className="h-7 w-7 text-[#a0aaa2]" />
+                  <p className="mt-2 text-xs text-[#879188]">
+                    No product images uploaded yet.
+                  </p>
+                </div>
+              )}
             </section>
 
             {/* Skin Compatibility & Safety */}
-            <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">
-                Skin Compatibility & Safety
-              </h3>
-              
-              <div className="space-y-6">
+            <section className="rounded-2xl border border-[#e7eae3] bg-white p-5 shadow-sm shadow-[#172b27]/[0.02] sm:p-8">
+              <SectionHeading
+                icon={ShieldCheck}
+                title="Skin Compatibility & Safety"
+                description="Specify suitable skin types, concerns and product information."
+              />
+
+              <div className="space-y-7">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Skin Type Compatibility</label>
-                  <div className="flex flex-wrap gap-3">
+                  <label className={labelClass}>Skin Type Compatibility</label>
+                  <p className="mb-3 mt-1 text-xs text-[#879188]">
+                    Select all applicable skin types.
+                  </p>
+
+                  <div className="flex flex-wrap gap-2">
                     {skinTypes.map((type) => (
-                      <label key={type} className="inline-flex items-center bg-white border rounded-full px-3 py-1 cursor-pointer hover:bg-gray-50">
-                        <input
-                          type="checkbox"
-                          value={type}
-                          checked={formData.skinType.includes(type)}
-                          onChange={(e) => handleArrayChange(e, "skinType")}
-                          className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">{type}</span>
-                      </label>
+                      <CheckboxPill
+                        key={type}
+                        value={type}
+                        checked={formData.skinType.includes(type)}
+                        onChange={(e) => handleArrayChange(e, "skinType")}
+                      />
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Skin Concerns Solved</label>
-                  <div className="flex flex-wrap gap-3">
+                  <label className={labelClass}>Skin Concerns Solved</label>
+                  <p className="mb-3 mt-1 text-xs text-[#879188]">
+                    Select the concerns this product addresses.
+                  </p>
+
+                  <div className="flex flex-wrap gap-2">
                     {skinConcerns.map((concern) => (
-                      <label key={concern} className="inline-flex items-center bg-white border rounded-full px-3 py-1 cursor-pointer hover:bg-gray-50">
-                        <input
-                          type="checkbox"
-                          value={concern}
-                          checked={formData.skinConcerns.includes(concern)}
-                          onChange={(e) => handleArrayChange(e, "skinConcerns")}
-                          className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">{concern}</span>
-                      </label>
+                      <CheckboxPill
+                        key={concern}
+                        value={concern}
+                        checked={formData.skinConcerns.includes(concern)}
+                        onChange={(e) => handleArrayChange(e, "skinConcerns")}
+                      />
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Allergy-Safe Labels</label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <label className={labelClass}>Allergy-Safe Labels</label>
+                  <p className="mb-3 mt-1 text-xs text-[#879188]">
+                    Select applicable formulation labels.
+                  </p>
+
+                  <div className="flex flex-wrap gap-2">
                     {allergyLabels.map((label) => (
-                      <label key={label} className="inline-flex items-center">
-                        <input
-                          type="checkbox"
-                          value={label}
-                          checked={formData.allergyLabels.includes(label)}
-                          onChange={(e) => handleArrayChange(e, "allergyLabels")}
-                          className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">{label}</span>
-                      </label>
+                      <CheckboxPill
+                        key={label}
+                        value={label}
+                        checked={formData.allergyLabels.includes(label)}
+                        onChange={(e) => handleArrayChange(e, "allergyLabels")}
+                      />
                     ))}
                   </div>
                 </div>
+              </div>
+            </section>
 
+            {/* Ingredients */}
+            <section className="rounded-2xl border border-[#e7eae3] bg-white p-5 shadow-sm shadow-[#172b27]/[0.02] sm:p-8">
+              <SectionHeading
+                icon={FlaskConical}
+                title="Ingredients & Warnings"
+                description="Add the formulation details used for product information and analysis."
+              />
+
+              <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Ingredients</label>
-                  <p className="text-xs text-gray-500 mb-1">Full ingredient list (comma separated)</p>
+                  <label className={labelClass}>Ingredients</label>
+                  <p className="mb-1 mt-1 text-xs text-[#879188]">
+                    Full ingredient list (comma separated).
+                  </p>
+
                   <textarea
                     name="ingredients"
                     value={formData.ingredients}
                     onChange={handleInputChange}
                     rows={3}
                     placeholder="Water, Glycerin, Niacinamide..."
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
+                    className={`${inputClass} resize-y`}
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Active Ingredients</label>
-                    <p className="text-xs text-gray-500 mb-1">Key actives for analysis (comma separated)</p>
+                    <label className={labelClass}>Active Ingredients</label>
+                    <p className="mb-1 mt-1 text-xs text-[#879188]">
+                      Key actives for analysis (comma separated).
+                    </p>
+
                     <input
                       type="text"
                       name="activeIngredients"
                       value={formData.activeIngredients}
                       onChange={handleInputChange}
                       placeholder="Salicylic Acid, Retinol, Vitamin C..."
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
+                      className={inputClass}
                     />
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Warnings / Contraindications</label>
-                    <p className="text-xs text-gray-500 mb-1">Usage warnings (comma separated)</p>
+                    <label className={labelClass}>
+                      Warnings / Contraindications
+                    </label>
+                    <p className="mb-1 mt-1 text-xs text-[#879188]">
+                      Usage warnings (comma separated).
+                    </p>
+
                     <input
                       type="text"
                       name="warnings"
                       value={formData.warnings}
                       onChange={handleInputChange}
                       placeholder="Avoid with Retinol, Not for sensitive skin..."
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
+                      className={inputClass}
                     />
                   </div>
                 </div>
@@ -434,125 +659,183 @@ const AddProduct = () => {
             </section>
 
             {/* Variants / Shades */}
-            <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">Variants / Shades</h3>
-              
-              <div className="bg-gray-50 p-4 rounded-md border mb-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-3">Add New Variant</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <section className="rounded-2xl border border-[#e7eae3] bg-white p-5 shadow-sm shadow-[#172b27]/[0.02] sm:p-8">
+              <SectionHeading
+                icon={Layers}
+                title="Variants / Shades"
+                description="Manage the available variants for this product."
+              />
+
+              {/* Add variant */}
+              <div className="rounded-xl border border-[#e7eae3] bg-[#fbfaf6] p-4 sm:p-5">
+                <h4 className="mb-5 font-editorial text-xl font-semibold text-[#172b27]">
+                  Add New Variant
+                </h4>
+
+                <div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Variant Name (e.g. Red, XL)</label>
+                    <label className={labelClass}>Variant Name</label>
                     <input
                       type="text"
                       name="name"
                       value={newVariant.name}
                       onChange={handleVariantChange}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
+                      placeholder="e.g. Red, XL"
+                      className={inputClass}
                     />
                   </div>
+
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Stock</label>
+                    <label className={labelClass}>Stock</label>
                     <input
                       type="number"
                       name="stock"
                       value={newVariant.stock}
                       onChange={handleVariantChange}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
+                      placeholder="Available quantity"
+                      className={inputClass}
                     />
                   </div>
+
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Price (₹)</label>
+                    <label className={labelClass}>Price (₹)</label>
                     <input
                       type="number"
                       name="price"
                       value={newVariant.price}
                       onChange={handleVariantChange}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm p-2 border"
+                      placeholder="Optional"
+                      className={inputClass}
                     />
                   </div>
+
                   <div className="flex gap-2">
-                     <label className="cursor-pointer bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-md hover:bg-gray-50 transition-colors flex items-center justify-center flex-1">
-                      <Upload className="w-4 h-4 mr-1" />
+                    <label className="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#dfe4dc] bg-white px-3 py-3 text-xs font-medium text-[#526b5d] transition-colors hover:border-[#718477]">
+                      <Upload className="h-4 w-4" />
                       Image
-                      <input type="file" className="hidden" onChange={handleVariantImageUpload} accept="image/*" />
+                      <input
+                        type="file"
+                        className="hidden"
+                        onChange={handleVariantImageUpload}
+                        accept="image/*"
+                      />
                     </label>
+
                     <button
                       type="button"
                       onClick={addVariant}
-                      className="bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700 transition-colors flex items-center"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#172b27] px-5 py-3 text-xs font-semibold text-white transition-colors hover:bg-[#294b40]"
                     >
-                      <Plus className="w-4 h-4 mr-1" /> Add
+                      <Plus className="h-4 w-4" />
+                      Add
                     </button>
                   </div>
                 </div>
+
                 {newVariant.image && (
-                    <div className="mt-2">
-                        <img src={newVariant.image} alt="Variant Preview" className="h-16 w-16 object-cover rounded border" />
-                    </div>
+                  <div className="mt-4 flex items-center gap-3">
+                    <img
+                      src={newVariant.image}
+                      alt="Variant Preview"
+                      className="h-16 w-16 rounded-lg border border-[#e7eae3] bg-white object-contain p-1"
+                    />
+                    <span className="text-xs text-[#718477]">
+                      Variant image preview
+                    </span>
+                  </div>
                 )}
               </div>
 
+              {/* Variant list */}
               {formData.variants.length > 0 && (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {formData.variants.map((variant, index) => (
-                        <tr key={index}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {variant.image ? (
-                                <img src={variant.image} alt={variant.name} className="h-10 w-10 object-cover rounded-full" />
-                            ) : (
-                                <span className="text-gray-400 text-xs">No Image</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{variant.name}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{variant.stock}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button
-                              type="button"
-                              onClick={() => removeVariant(index)}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              <Trash className="w-4 h-4" />
-                            </button>
-                          </td>
+                <div className="mt-6 overflow-hidden rounded-xl border border-[#e7eae3]">
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[450px] text-left">
+                      <thead className="bg-[#fbfaf6]">
+                        <tr>
+                          {["Image", "Name", "Stock", "Action"].map(
+                            (heading) => (
+                              <th
+                                key={heading}
+                                className="px-5 py-4 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#879188]"
+                              >
+                                {heading}
+                              </th>
+                            )
+                          )}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+
+                      <tbody>
+                        {formData.variants.map((variant, index) => (
+                          <tr
+                            key={index}
+                            className="border-t border-[#e7eae3] transition-colors hover:bg-[#fbfaf6]"
+                          >
+                            <td className="px-5 py-3">
+                              {variant.image ? (
+                                <img
+                                  src={variant.image}
+                                  alt={variant.name}
+                                  className="h-11 w-11 rounded-lg border border-[#e7eae3] bg-white object-contain p-1"
+                                />
+                              ) : (
+                                <span className="text-xs text-[#a0aaa2]">
+                                  No Image
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="px-5 py-3 text-sm font-medium text-[#294b40]">
+                              {variant.name}
+                            </td>
+
+                            <td className="px-5 py-3 text-sm text-[#718477]">
+                              {variant.stock}
+                            </td>
+
+                            <td className="px-5 py-3">
+                              <button
+                                type="button"
+                                onClick={() => removeVariant(index)}
+                                aria-label={`Remove ${variant.name}`}
+                                className="flex h-8 w-8 items-center justify-center rounded-full text-[#a35e55] transition-colors hover:bg-[#f6e9e7]"
+                              >
+                                <Trash className="h-4 w-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </section>
 
-            <div className="flex justify-end pt-6 border-t">
+            {/* Form Actions */}
+            <div className="flex flex-col-reverse gap-3 border-t border-[#dfe4dc] pt-6 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={() => navigate("/admin")}
-                className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md mr-4 hover:bg-gray-50 transition-colors"
+                className="rounded-full border border-[#dfe4dc] bg-white px-7 py-3.5 text-xs font-semibold uppercase tracking-[0.12em] text-[#526b5d] transition-all hover:border-[#172b27] hover:text-[#172b27]"
               >
                 Cancel
               </button>
+
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-emerald-600 text-white px-6 py-2 rounded-md hover:bg-emerald-700 transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#172b27] px-8 py-3.5 text-xs font-semibold uppercase tracking-[0.14em] text-[#f8f6f0] transition-all hover:bg-[#294b40] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading ? (
                   <>
-                    <Loader className="w-5 h-5 mr-2 animate-spin" />
-                    Creating...
+                    <Loader className="h-4 w-4 animate-spin" />
+                    {isEditMode ? "Updating..." : "Creating..."}
                   </>
                 ) : (
                   <>
-                    <Plus className="w-5 h-5 mr-2" />
+                    <Plus className="h-4 w-4" />
                     {isEditMode ? "Update Product" : "Create Product"}
                   </>
                 )}
