@@ -3,20 +3,20 @@ import { Link } from "react-router-dom";
 
 // Helper to ensure paths are somewhat standard if passed correctly
 // Accepting title, price, image, bgImage as props to make it reusable
-const ThreeDProductCard = ({ 
-  title = "Soap", 
-  price = "899.00", 
-  image = "/Soap.png", 
+const ThreeDProductCard = ({
+  title = "Soap",
+  price = "899.00",
+  image = "/Soap.png",
   bgImage = "/Soap.jpg",
   category = "Soap",
   className = ""
 }) => {
   return (
     <Link to={`/products?category=${category}`} className={`perspective-[2500px] w-fit ${className} block`}>
-      
+
       <div className="group relative w-[240px] h-[340px] flex items-end justify-center p-4 transition-transform duration-500 ease-out hover:scale-[0.98] preserve-3d">
-        
-   
+
+
         <div className="absolute inset-0 p-2 preserve-3d">
           <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-500 ease-out group-hover:-translate-y-3 group-hover:rotate-x-[45deg] preserve-3d">
             <img
@@ -35,7 +35,7 @@ const ThreeDProductCard = ({
           alt={`${title} Product`}
           className="absolute w-[60%] scale-[1] bottom-24 opacity-0 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:-translate-y-8 translate-z-160 z-20 preserve-3d"
         />
-        
+
         <div className="absolute bottom-12 w-[90%] h-6 bg-black/90 blur-xl opacity-0 group-hover:opacity-100 transition duration-500"></div>
 
         <div className="relative z-30 w-full text-center text-white opacity-0 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:-translate-y-12 translate-y-2 translate-z-140 preserve-3d">

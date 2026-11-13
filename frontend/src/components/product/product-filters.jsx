@@ -29,9 +29,9 @@ export default function ProductFilters({ filters, setFilters }) {
     "Fragrance Balm",
   ]
   const concerns = [
-    "Acne", "Breakouts", "Blackheads", "Large pores", "Uneven texture", 
-    "Pigmentation", "Dark spots", "Uneven tone", "Dullness", "Fine lines", 
-    "Wrinkles", "Loss of firmness", "Dryness", "Flakiness", "Redness", 
+    "Acne", "Breakouts", "Blackheads", "Large pores", "Uneven texture",
+    "Pigmentation", "Dark spots", "Uneven tone", "Dullness", "Fine lines",
+    "Wrinkles", "Loss of firmness", "Dryness", "Flakiness", "Redness",
     "Rosacea", "Sensitivity", "Dark circles", "Puffiness"
   ]
 
@@ -53,11 +53,11 @@ export default function ProductFilters({ filters, setFilters }) {
     })
   }
 
-  const hasActiveFilters = 
-    filters.skinType.length > 0 || 
-    filters.category.length > 0 || 
-    filters.concern.length > 0 || 
-    filters.priceRange[0] !== 0 || 
+  const hasActiveFilters =
+    filters.skinType.length > 0 ||
+    filters.category.length > 0 ||
+    filters.concern.length > 0 ||
+    filters.priceRange[0] !== 0 ||
     filters.priceRange[1] !== 5000;
 
   return (
@@ -82,8 +82,8 @@ export default function ProductFilters({ filters, setFilters }) {
           className="w-full flex justify-between items-center text-left mb-2 group"
         >
           <span className="text-xs tracking-wider text-gray-400 uppercase">Skin Type</span>
-          <ChevronRight 
-            className={`w-4 h-4 text-gray-400 transition-transform duration-300 ease-in-out ${expandedSections.skinType ? 'rotate-90' : 'rotate-0'}`} 
+          <ChevronRight
+            className={`w-4 h-4 text-gray-400 transition-transform duration-300 ease-in-out ${expandedSections.skinType ? 'rotate-90' : 'rotate-0'}`}
           />
         </button>
 
@@ -94,11 +94,10 @@ export default function ProductFilters({ filters, setFilters }) {
                 <button
                   key={type}
                   onClick={() => handleFilterChange('skinType', type)}
-                  className={`block w-full text-left text-xs tracking-wide transition-colors ${
-                    filters.skinType.includes(type)
+                  className={`block w-full text-left text-xs tracking-wide transition-colors ${filters.skinType.includes(type)
                       ? 'font-bold text-black'
                       : 'font-normal text-black hover:text-gray-600'
-                  }`}
+                    }`}
                 >
                   {type}
                 </button>
@@ -115,8 +114,8 @@ export default function ProductFilters({ filters, setFilters }) {
           className="w-full flex justify-between items-center text-left mb-2 group"
         >
           <span className="text-xs tracking-wider text-gray-400 uppercase">Category</span>
-          <ChevronRight 
-            className={`w-4 h-4 text-gray-400 transition-transform duration-300 ease-in-out ${expandedSections.category ? 'rotate-90' : 'rotate-0'}`} 
+          <ChevronRight
+            className={`w-4 h-4 text-gray-400 transition-transform duration-300 ease-in-out ${expandedSections.category ? 'rotate-90' : 'rotate-0'}`}
           />
         </button>
 
@@ -127,11 +126,10 @@ export default function ProductFilters({ filters, setFilters }) {
                 <button
                   key={cat}
                   onClick={() => handleFilterChange('category', cat)}
-                  className={`block w-full text-left text-xs tracking-wide transition-colors ${
-                    filters.category.includes(cat)
+                  className={`block w-full text-left text-xs tracking-wide transition-colors ${filters.category.includes(cat)
                       ? 'font-bold text-black'
                       : 'font-normal text-black hover:text-gray-600'
-                  }`}
+                    }`}
                 >
                   {cat}
                 </button>
@@ -148,8 +146,8 @@ export default function ProductFilters({ filters, setFilters }) {
           className="w-full flex justify-between items-center text-left mb-2 group"
         >
           <span className="text-xs tracking-wider text-gray-400 uppercase">Concerns</span>
-          <ChevronRight 
-            className={`w-4 h-4 text-gray-400 transition-transform duration-300 ease-in-out ${expandedSections.concern ? 'rotate-90' : 'rotate-0'}`} 
+          <ChevronRight
+            className={`w-4 h-4 text-gray-400 transition-transform duration-300 ease-in-out ${expandedSections.concern ? 'rotate-90' : 'rotate-0'}`}
           />
         </button>
 
@@ -160,11 +158,10 @@ export default function ProductFilters({ filters, setFilters }) {
                 <button
                   key={concern}
                   onClick={() => handleFilterChange('concern', concern)}
-                  className={`block w-full text-left text-xs tracking-wide transition-colors ${
-                    filters.concern.includes(concern)
+                  className={`block w-full text-left text-xs tracking-wide transition-colors ${filters.concern.includes(concern)
                       ? 'font-bold text-black'
                       : 'font-normal text-black hover:text-gray-600'
-                  }`}
+                    }`}
                 >
                   {concern}
                 </button>
@@ -181,18 +178,18 @@ export default function ProductFilters({ filters, setFilters }) {
           className="w-full flex justify-between items-center text-left mb-2 group"
         >
           <span className="text-xs tracking-wider text-gray-400 uppercase">Price Range</span>
-          <ChevronRight 
-            className={`w-4 h-4 text-gray-400 transition-transform duration-300 ease-in-out ${expandedSections.price ? 'rotate-90' : 'rotate-0'}`} 
+          <ChevronRight
+            className={`w-4 h-4 text-gray-400 transition-transform duration-300 ease-in-out ${expandedSections.price ? 'rotate-90' : 'rotate-0'}`}
           />
         </button>
 
         <div className={`grid transition-[grid-template-rows] duration-500 ease-in-out ${expandedSections.price ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
           <div className="overflow-hidden">
             <div className="pt-4">
-               <div className="flex justify-between items-center mb-4">
-                  <span className="text-xs text-black font-medium">₹{filters.priceRange[0]}</span>
-                  <span className="text-xs text-black font-medium">₹{filters.priceRange[1]}</span>
-               </div>
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-xs text-black font-medium">₹{filters.priceRange[0]}</span>
+                <span className="text-xs text-black font-medium">₹{filters.priceRange[1]}</span>
+              </div>
               <input
                 type="range"
                 min="0"

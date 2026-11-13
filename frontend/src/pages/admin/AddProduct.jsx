@@ -295,8 +295,8 @@ const AddProduct = () => {
   const CheckboxPill = ({ value, checked, onChange }) => (
     <label
       className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-2 text-xs transition-all ${checked
-          ? "border-[#718477] bg-[#edf0e7] text-[#294b40]"
-          : "border-[#e7eae3] bg-white text-[#718477] hover:border-[#aab9aa]"
+        ? "border-[#718477] bg-[#edf0e7] text-[#294b40]"
+        : "border-[#e7eae3] bg-white text-[#718477] hover:border-[#aab9aa]"
         }`}
     >
       <input
