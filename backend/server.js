@@ -38,27 +38,29 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://belief-cosmetics.vercel.app",
   "https://kumar-kosmetics.vercel.app",
-  process.env.CLIENT_URL
+  process.env.CLIENT_URL,
 ].filter(Boolean);
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (
-      allowedOrigins.includes(origin) ||
-      origin.endsWith(".vercel.app") ||
-      origin.includes("localhost")
-    ) {
-      return callback(null, true);
-    }
-    return callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".vercel.app") ||
+        origin.includes("localhost")
+      ) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 
 // Security Headers
 app.use((req, res, next) => {
-  res.setHeader('Cross-Origin-Opener-Policy', 'unsafe-none');
+  res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
   next();
 });
 
@@ -78,28 +80,28 @@ app.use("/api/returns", returnRoutes);
 
 // Health Check
 app.get("/", (req, res) => {
-	res.json({ message: "Server is running", status: "OK" });
+  res.json({ message: "Server is running", status: "OK" });
 });
 
 // Maintenance/Utils
 app.get("/api/drop-index", async (req, res) => {
-    try {
-        const indexName = "stripeSessionId_1";
-        const indexes = await Order.collection.indexes();
-        
-        if (indexes.find(index => index.name === indexName)) {
-            await Order.collection.dropIndex(indexName);
-            res.json({ message: `Dropped index: ${indexName}` });
-        } else {
-            res.json({ message: `Index ${indexName} not found` });
-        }
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+  try {
+    const indexName = "stripeSessionId_1";
+    const indexes = await Order.collection.indexes();
+
+    if (indexes.find((index) => index.name === indexName)) {
+      await Order.collection.dropIndex(indexName);
+      res.json({ message: `Dropped index: ${indexName}` });
+    } else {
+      res.json({ message: `Index ${indexName} not found` });
     }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Start Server
 app.listen(PORT, () => {
-	console.log("Server is running on http://localhost:" + PORT);
-	connectDB();
+  console.log("Server is running on http://localhost:" + PORT);
+  connectDB();
 });
