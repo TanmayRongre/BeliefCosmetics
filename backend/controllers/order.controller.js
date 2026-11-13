@@ -1,0 +1,119 @@
+import Order from "../models/Order.model.js";
+import Product from "../models/product.model.js";
+import { sendOrderConfirmationEmail } from "../lib/email.service.js";
+
+export const createOrder = async (req, res) => {
+	try {
+		console.log("createOrder req.user:", req.user);
+		console.log("createOrder req.body:", req.body);
+		const { items, totalAmount, address, paymentMethod, couponCode, discountAmount } = req.body;
+
+        // 1. Validate Stock
+        for (const item of items) {
+            const product = await Product.findById(item.product);
+            if (!product) {
+                return res.status(404).json({ message: `Product not found: ${item.name}` });
+            }
+            if (product.stock < item.quantity) {
+                 return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
+            }
+        }
+
+		const newOrder = new Order({
+			user: req.user._id,
+			items,
+			totalAmount,
+            discountAmount,
+            couponCode,
+			address,
+			paymentMethod,
+            paymentStatus: paymentMethod === "COD" ? "Pending" : "Pending",
+		});
+
+		const savedOrder = await newOrder.save();
+
+        // 2. Decrement Stock
+        for (const item of items) {
+             await Product.findByIdAndUpdate(item.product, { 
+                 $inc: { stock: -item.quantity } 
+             });
+        }
+
+        // Send confirmation email asynchronously (don't await to avoid delaying response)
+        // Send confirmation email asynchronously (don't await to avoid delaying response)
+        /*
+        try {
+            await sendOrderConfirmationEmail(savedOrder, req.user);
+        } catch(emailErr) {
+            console.error("Email sending failed:", emailErr);
+        }
+        */
+
+		res.status(201).json(savedOrder);
+	} catch (error) {
+		console.log("Error in createOrder:", error);
+		res.status(500).json({ message: "Server Error", error: error.message, details: error.errors });
+	}
+};
+
+export const getUserOrders = async (req, res) => {
+	try {
+		const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+		res.json(orders);
+	} catch (error) {
+		console.log("Error in getUserOrders", error);
+		res.status(500).json({ message: "Server Error", error: error.message });
+	}
+};
+
+export const getAllOrders = async (req, res) => {
+    try {
+        const orders = await Order.find().populate("user", "name email phone").sort({ createdAt: -1 });
+        res.json(orders);
+    } catch (error) {
+        console.log("Error in getAllOrders", error);
+        res.status(500).json({ message: "Server Error", error: error.message });
+    }
+};
+
+export const updateOrderStatus = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { status, trackingId, adminNotes } = req.body;
+
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        if (status) order.status = status;
+        if (trackingId !== undefined) order.trackingId = trackingId;
+        if (adminNotes !== undefined) order.adminNotes = adminNotes;
+        
+        await order.save();
+
+        res.json(order);
+    } catch (error) {
+        console.log("Error in updateOrderStatus", error);
+        res.status(500).json({ message: "Server Error", error: error.message });
+    }
+};
+
+// @desc    Get order by ID
+// @route   GET /api/orders/:id
+// @access  Private
+export const getOrderById = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id).populate("user", "name email");
+
+        if (order) {
+            res.json(order);
+        } else {
+            res.status(404).json({ message: "Order not found" });
+        }
+    } catch (error) {
+        console.log("Error in getOrderById controller", error.message);
+        res.status(500).json({ message: "Server Error", error: error.message });
+    }
+};

@@ -1,0 +1,711 @@
+/* =========================================================
+   BELIEF COSMETICS — GLOBAL DESIGN SYSTEM
+   Luxury Editorial Skincare
+   Tailwind CSS v4
+   ========================================================= */
+
+
+/* =========================================================
+   1. FONT IMPORTS
+   Only TWO font families:
+   - Cormorant Garamond: Editorial headings
+   - DM Sans: Body, navigation and UI
+========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+
+/* =========================================================
+   2. BRAND COLORS & GLOBAL VARIABLES
+========================================================= */
+
+:root {
+  /* Typography */
+  --font-heading: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', Arial, sans-serif;
+
+  /* Belief Cosmetics Brand Palette */
+  --brand-dark: #172b27;
+  --brand-green: #294b40;
+  --brand-sage: #718477;
+  --brand-muted: #879188;
+
+  --brand-cream: #f8f6f0;
+  --brand-ivory: #f5f2e9;
+  --brand-white: #ffffff;
+
+  --brand-border: #e7eae3;
+  --brand-border-dark: #d9ded5;
+
+  --brand-text: #172b27;
+  --brand-text-secondary: #53645a;
+  --brand-text-muted: #879188;
+
+  /* Background and Foreground */
+  --background: #f8f6f0;
+  --foreground: #172b27;
+
+  /* Cards */
+  --card: #ffffff;
+  --card-foreground: #172b27;
+
+  /* Popovers */
+  --popover: #ffffff;
+  --popover-foreground: #172b27;
+
+  /* Primary */
+  --primary: #294b40;
+  --primary-foreground: #ffffff;
+
+  /* Secondary */
+  --secondary: #e9eee7;
+  --secondary-foreground: #172b27;
+
+  /* Muted */
+  --muted: #efeee8;
+  --muted-foreground: #718477;
+
+  /* Accent */
+  --accent: #dce5dc;
+  --accent-foreground: #294b40;
+
+  /* Destructive */
+  --destructive: #b94b43;
+  --destructive-foreground: #ffffff;
+
+  /* Borders and Inputs */
+  --border: #e7eae3;
+  --input: #e0e5dd;
+  --ring: #718477;
+
+  /* Charts */
+  --chart-1: #294b40;
+  --chart-2: #718477;
+  --chart-3: #a5b5a3;
+  --chart-4: #b6a58d;
+  --chart-5: #526d60;
+
+  /* Radius */
+  --radius: 0.75rem;
+
+  /* Sidebar */
+  --sidebar: #f5f2e9;
+  --sidebar-foreground: #172b27;
+  --sidebar-primary: #294b40;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e9eee7;
+  --sidebar-accent-foreground: #172b27;
+  --sidebar-border: #e7eae3;
+  --sidebar-ring: #718477;
+
+  /* Shadows */
+  --shadow-soft: 0 8px 30px rgba(23, 43, 39, 0.06);
+  --shadow-card: 0 15px 45px rgba(23, 43, 39, 0.08);
+  --shadow-hover: 0 20px 55px rgba(23, 43, 39, 0.13);
+
+  /* Animation */
+  --transition-smooth: 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
+/* =========================================================
+   3. TAILWIND CSS V4 THEME
+========================================================= */
+
+@theme inline {
+  /* Fonts */
+  --font-sans: 'DM Sans', Arial, sans-serif;
+  --font-editorial: 'Cormorant Garamond', Georgia, serif;
+  --font-mono: monospace;
+
+  /* Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+
+/* =========================================================
+   4. DARK MODE
+========================================================= */
+
+.dark {
+  --background: #101b18;
+  --foreground: #f8f6f0;
+
+  --card: #172722;
+  --card-foreground: #f8f6f0;
+
+  --popover: #172722;
+  --popover-foreground: #f8f6f0;
+
+  --primary: #a5b5a3;
+  --primary-foreground: #172b27;
+
+  --secondary: #253a32;
+  --secondary-foreground: #f8f6f0;
+
+  --muted: #25332d;
+  --muted-foreground: #a5b5a3;
+
+  --accent: #30483d;
+  --accent-foreground: #f8f6f0;
+
+  --destructive: #e07870;
+  --destructive-foreground: #ffffff;
+
+  --border: #304139;
+  --input: #304139;
+  --ring: #718477;
+
+  --chart-1: #a5b5a3;
+  --chart-2: #718477;
+  --chart-3: #d1d9ca;
+  --chart-4: #b6a58d;
+  --chart-5: #526d60;
+
+  --sidebar: #14221d;
+  --sidebar-foreground: #f8f6f0;
+  --sidebar-primary: #a5b5a3;
+  --sidebar-primary-foreground: #172b27;
+  --sidebar-accent: #253a32;
+  --sidebar-accent-foreground: #f8f6f0;
+  --sidebar-border: #304139;
+  --sidebar-ring: #718477;
+
+  --brand-cream: #101b18;
+  --brand-ivory: #172722;
+  --brand-border: #304139;
+  --brand-text: #f8f6f0;
+  --brand-text-secondary: #c3cec3;
+  --brand-text-muted: #a5b5a3;
+
+  --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.15);
+  --shadow-card: 0 15px 45px rgba(0, 0, 0, 0.2);
+  --shadow-hover: 0 20px 55px rgba(0, 0, 0, 0.3);
+}
+
+
+/* =========================================================
+   5. GLOBAL BASE STYLES
+========================================================= */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+
+    margin: 0;
+    min-width: 320px;
+
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.7;
+
+    background-color: var(--brand-cream);
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  /* Editorial headings */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+  }
+
+  /* UI and body typography */
+  p,
+  li,
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  label {
+    font-family: var(--font-body);
+  }
+
+  /* Intentionally do not set a global font on span.
+     This preserves nested editorial typography. */
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  img,
+  video,
+  svg {
+    max-width: 100%;
+  }
+
+  img {
+    display: block;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ::selection {
+    color: #ffffff;
+    background-color: #294b40;
+  }
+
+  :focus-visible {
+    outline: 2px solid #718477;
+    outline-offset: 3px;
+  }
+}
+
+
+/* =========================================================
+   6. TYPOGRAPHY UTILITIES
+========================================================= */
+
+@layer utilities {
+  .font-editorial {
+    font-family: var(--font-heading);
+  }
+
+  .font-sans {
+    font-family: var(--font-body);
+  }
+
+  .editorial-heading {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+  }
+
+  .editorial-italic {
+    font-family: var(--font-heading);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .body-text {
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.8;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  .tracking-luxury {
+    letter-spacing: 0.25em;
+  }
+
+  .tracking-editorial {
+    letter-spacing: 0.12em;
+  }
+
+  .text-brand {
+    color: var(--brand-dark);
+  }
+
+  .text-brand-green {
+    color: var(--brand-green);
+  }
+
+  .text-brand-sage {
+    color: var(--brand-sage);
+  }
+
+  .bg-brand {
+    background-color: var(--brand-dark);
+  }
+
+  .bg-brand-green {
+    background-color: var(--brand-green);
+  }
+
+  .bg-brand-cream {
+    background-color: var(--brand-cream);
+  }
+
+  .bg-brand-ivory {
+    background-color: var(--brand-ivory);
+  }
+
+  .border-brand {
+    border-color: var(--brand-border);
+  }
+
+  .shadow-brand {
+    box-shadow: var(--shadow-card);
+  }
+}
+
+
+/* =========================================================
+   7. 3D TRANSFORM HELPERS
+========================================================= */
+
+.perspective-2500 {
+  perspective: 2500px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.translate-z-50 {
+  transform: translateZ(50px);
+}
+
+.translate-z-60 {
+  transform: translateZ(60px);
+}
+
+.translate-z-80 {
+  transform: translateZ(80px);
+}
+
+.translate-z-100 {
+  transform: translateZ(100px);
+}
+
+.translate-z-120 {
+  transform: translateZ(120px);
+}
+
+.translate-z-140 {
+  transform: translateZ(140px);
+}
+
+.translate-z-160 {
+  transform: translateZ(160px);
+}
+
+
+/* =========================================================
+   8. SCROLLBAR DESIGN
+========================================================= */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #b5c0b2 #f8f6f0;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f8f6f0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #b5c0b2;
+  border: 2px solid #f8f6f0;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #718477;
+}
+
+.dark * {
+  scrollbar-color: #526d60 #101b18;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #101b18;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #526d60;
+  border-color: #101b18;
+}
+
+
+/* =========================================================
+   9. ANIMATION UTILITIES
+========================================================= */
+
+@layer components {
+  .fade-in {
+    animation: fadeIn 0.6s ease-in both;
+  }
+
+  .slide-up {
+    animation: slideUp 0.7s ease-out both;
+  }
+
+  .fade-in-up {
+    animation: fadeInUp 0.8s ease-out both;
+  }
+
+  .soft-scale {
+    animation: softScale 0.7s ease-out both;
+  }
+
+  .reveal-left {
+    animation: revealLeft 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .reveal-right {
+    animation: revealRight 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .editorial-reveal {
+    animation: editorialReveal 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .image-zoom {
+    animation: imageZoom 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .float-gentle {
+    animation: floatGentle 5s ease-in-out infinite;
+  }
+
+  .line-reveal {
+    transform-origin: left;
+    animation: lineReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+
+/* =========================================================
+   10. KEYFRAMES
+========================================================= */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes softScale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes revealLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-35px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes revealRight {
+  from {
+    opacity: 0;
+    transform: translateX(35px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes editorialReveal {
+  from {
+    opacity: 0;
+    transform: translateY(35px);
+    filter: blur(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes imageZoom {
+  from {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes floatGentle {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes lineReveal {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+
+/* =========================================================
+   11. REDUCED MOTION ACCESSIBILITY
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* =========================================================
+   12. RESPONSIVE TYPOGRAPHY
+========================================================= */
+
+@media (max-width: 640px) {
+  body {
+    font-size: 13px;
+  }
+
+  h1 {
+    letter-spacing: -0.035em;
+  }
+
+  .tracking-luxury {
+    letter-spacing: 0.16em;
+  }
+}

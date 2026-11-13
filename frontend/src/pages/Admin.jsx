@@ -1,0 +1,145 @@
+import { useState, useEffect } from "react"
+import { useLocation } from "react-router-dom"
+import axiosInstance from "../lib/axios"
+import toast from "react-hot-toast"
+import AdminHeader from "@/components/admin/admin-header"
+import AdminSidebar from "@/components/admin/admin-sidebar"
+import DashboardOverview from "../components/admin/dashboard-overview"
+import ProductsManager from "@/components/admin/products-manager"
+import OrdersSection from "@/components/admin/orders-section"
+import CategoriesSection from "@/components/product/categories-section"
+import CustomersSection from "@/components/admin/customers-section"
+import AdminSkinAnalyzer from "./admin/AdminSkinAnalyzer";
+import AdminContactMessages from "@/components/admin/AdminContactMessages";
+
+export default function Admin() {
+  const location = useLocation()
+  const [currentSection, setCurrentSection] = useState("overview")
+  const [products, setProducts] = useState([])
+  const [productsPage, setProductsPage] = useState(1);
+  const [productsTotalPages, setProductsTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  
+  // Search and Sort State
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [order, setOrder] = useState("desc");
+  
+  useEffect(() => {
+    if (location.state?.section) {
+        setCurrentSection(location.state.section);
+    }
+  }, [location.state]);
+  
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axiosInstance.get(`/products`, {
+          params: {
+            page: productsPage,
+            limit: 20,
+            search,
+            sortBy,
+            order
+          }
+        });
+        setProducts(res.data.products);
+        setProductsTotalPages(res.data.totalPages);
+        setTotalProducts(res.data.totalProducts);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        toast.error("Failed to fetch products");
+      }
+    };
+    if (currentSection === "products" || currentSection === "overview") {
+      fetchProducts();
+    }
+  }, [productsPage, currentSection, search, sortBy, order]);
+
+  const [orders, setOrders] = useState([])
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const res = await axiosInstance.get("/orders/admin");
+        setOrders(res.data);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        toast.error("Failed to fetch orders");
+      }
+    };
+    if (currentSection === "orders" || currentSection === "overview") {
+        fetchOrders();
+    }
+  }, [currentSection]);
+
+  const [returns, setReturns] = useState([])
+
+  useEffect(() => {
+    const fetchReturns = async () => {
+      try {
+        const res = await axiosInstance.get("/returns/admin");
+        setReturns(res.data);
+      } catch (error) {
+        console.error("Error fetching returns:", error);
+        toast.error("Failed to fetch returns");
+      }
+    };
+    if (currentSection === "orders") {
+        fetchReturns();
+    }
+  }, [currentSection]);
+
+  const [customers, setCustomers] = useState([])
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const res = await axiosInstance.get("/auth/users");
+        setCustomers(res.data);
+      } catch (error) {
+        console.error("Error fetching customers:", error);
+        toast.error("Failed to fetch customers");
+      }
+    };
+    if (currentSection === "customers" || currentSection === "overview") {
+        fetchCustomers();
+    }
+  }, [currentSection]);
+
+  return (
+    <div className="flex h-screen bg-slate-900">
+      <AdminSidebar currentSection={currentSection} setCurrentSection={setCurrentSection} />
+
+      <div className="flex-1 flex flex-col overflow-hidden bg-gray-50 rounded-l-2xl shadow-2xl my-2 mr-2">
+        
+        <main className="flex-1 overflow-y-auto">
+          {currentSection === "overview" && <DashboardOverview products={products} orders={orders} customers={customers} totalProductsCount={totalProducts} />}
+          {currentSection === "products" && (
+            <ProductsManager 
+              products={products} 
+              setProducts={setProducts} 
+              page={productsPage}
+              setPage={setProductsPage}
+              totalPages={productsTotalPages}
+              totalProducts={totalProducts}
+              search={search}
+              setSearch={setSearch}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              order={order}
+              setOrder={setOrder}
+            />
+          )}
+          {currentSection === "orders" && <OrdersSection orders={orders} setOrders={setOrders} returns={returns} />}
+          {currentSection === "categories" && <CategoriesSection />}
+          {currentSection === "customers" && <CustomersSection customers={customers} />}
+          {currentSection === "messages" && <AdminContactMessages />}
+          
+          {/* Skin Analyzer Sections */}
+          {currentSection === "skin-analyzer" && <AdminSkinAnalyzer />}
+        </main>
+      </div>
+    </div>
+  )
+}
