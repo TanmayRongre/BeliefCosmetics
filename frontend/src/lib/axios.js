@@ -1,12 +1,16 @@
 import axios from "axios";
 
-const rawUrl = import.meta.env.VITE_API_URL || "";
-const cleanUrl = rawUrl.replace(/\/+$/, "");
+const rawUrl =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.MODE === "development"
+    ? "http://localhost:5000"
+    : "https://beliefcosmetics-i4mb.onrender.com");
+const cleanUrl = (rawUrl || "https://beliefcosmetics-i4mb.onrender.com").replace(
+  /\/+$/,
+  ""
+);
 
-const BASE_URL =
-  import.meta.env.MODE === "development" && !rawUrl
-    ? "http://localhost:5000/api"
-    : `${cleanUrl}/api`;
+const BASE_URL = `${cleanUrl}/api`;
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,

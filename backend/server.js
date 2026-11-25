@@ -48,7 +48,8 @@ app.use(
       if (
         allowedOrigins.includes(origin) ||
         origin.endsWith(".vercel.app") ||
-        origin.includes("localhost")
+        origin.includes("localhost") ||
+        origin.startsWith("capacitor://")
       ) {
         return callback(null, true);
       }

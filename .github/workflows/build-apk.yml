@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       backend_url:
-        description: "Backend API URL (e.g. https://your-backend.onrender.com)"
+        description: "Backend API URL (e.g. https://beliefcosmetics-i4mb.onrender.com)"
         required: false
-        default: ""
+        default: "https://beliefcosmetics-i4mb.onrender.com"
 
 jobs:
   build-apk:
@@ -45,7 +45,7 @@ jobs:
         working-directory: frontend
         run: npm run build
         env:
-          VITE_API_URL: ${{ inputs.backend_url || secrets.VITE_API_URL || 'https://belief-cosmetics-backend.onrender.com' }}
+          VITE_API_URL: ${{ inputs.backend_url || secrets.VITE_API_URL || 'https://beliefcosmetics-i4mb.onrender.com' }}
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID || '461064917406-b97kmegjfddrrbqu1sk2b0egfngf3v2l.apps.googleusercontent.com' }}
 
       - name: Sync Web Assets to Android
