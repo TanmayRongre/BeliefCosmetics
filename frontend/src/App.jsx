@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from './store/useAuthStore'
 import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 import { AnimatePresence } from 'framer-motion';
+import { setupCapacitor } from './lib/capacitor';
 
 // Pages
 import Home from './pages/Home'
@@ -31,7 +32,12 @@ import TermsPage from './pages/TermsPage';
 
 function AnimatedRoutes() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { authUser } = useAuthStore();
+
+  useEffect(() => {
+    return setupCapacitor(navigate, location);
+  }, [navigate, location]);
 
   return (
     <AnimatePresence mode="wait">

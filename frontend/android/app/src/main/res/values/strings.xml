@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Belief Cosmetics</string>
+    <string name="title_activity_main">Belief Cosmetics</string>
+    <string name="package_name">com.beliefcosmetics.app</string>
+    <string name="custom_url_scheme">com.beliefcosmetics.app</string>
+</resources>
