@@ -1,0 +1,70 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/build-apk.yml"
+  workflow_dispatch:
+    inputs:
+      backend_url:
+        description: "Backend API URL (e.g. https://your-backend.onrender.com)"
+        required: false
+        default: ""
+
+jobs:
+  build-apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build Web Assets (Vite)
+        working-directory: frontend
+        run: npm run build
+        env:
+          VITE_API_URL: ${{ inputs.backend_url || secrets.VITE_API_URL || 'https://belief-cosmetics-backend.onrender.com' }}
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID || '461064917406-b97kmegjfddrrbqu1sk2b0egfngf3v2l.apps.googleusercontent.com' }}
+
+      - name: Sync Web Assets to Android
+        working-directory: frontend
+        run: npx cap sync android
+
+      - name: Make Gradlew Executable
+        working-directory: frontend/android
+        run: chmod +x gradlew
+
+      - name: Build APK with Gradle
+        working-directory: frontend/android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BeliefCosmetics-Debug-APK
+          path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
